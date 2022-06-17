@@ -1,4 +1,4 @@
-import { assert } from "https://deno.land/std@0.143.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.143.0/testing/asserts.ts";
 
 class VisitService {
   registerDelivery() {}
@@ -21,7 +21,7 @@ Deno.test("calculate price example 1", () => {
   const price = priceCalculationService.calculate();
 
   // THEN
-  assert(price == 0);
+  assertEquals(price, 0)
 });
 
 Deno.test("calculate price example 2", () => {
@@ -36,5 +36,5 @@ Deno.test("calculate price example 2", () => {
   const price = priceCalculationService.calculate();
 
   // THEN
-  assert(price == 0.2);
+  assertEquals(price, 0.2)
 });
