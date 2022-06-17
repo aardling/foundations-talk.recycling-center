@@ -58,7 +58,11 @@ class PriceCalculationService {
     const visitor = this.visitorRepository.findById(id);
     const deliveries = visitor!.deliveries;
     return deliveries.reduce((price, delivery) => {
-      return price + (delivery.weight * 0.1);
+      let weight = delivery.weight;
+      if (visitor!.city === "Pineville") {
+        weight = weight - 100;
+      }
+      return price + (weight * 0.1);
     }, 0);
   }
 }
