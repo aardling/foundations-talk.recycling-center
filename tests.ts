@@ -8,8 +8,11 @@ type delivery = {
 class Visitor {
   private _deliveries: delivery[] = [];
   private readonly _id: string;
-  constructor(id: string) {
+  private readonly _city: string;
+
+  constructor(id: string, city: string) {
     this._id = id;
+    this._city = city;
   }
   addDelivery(deliveries: delivery[]) {
     this._deliveries = this._deliveries.concat(deliveries);
@@ -21,6 +24,10 @@ class Visitor {
 
   get deliveries() {
     return this._deliveries;
+  }
+
+  get city() {
+    return this._city
   }
 }
 
@@ -73,8 +80,8 @@ Deno.test("calculate price example 1", () => {
   const priceCalculationService = new PriceCalculationService(
     visitorRepository,
   );
-  const visitorId = "1";
-  const visitor = new Visitor(visitorId);
+  const visitorId = "Kasey";
+  const visitor = new Visitor(visitorId, "Moon village");
   visitorRepository.save(visitor);
 
   // GIVEN
@@ -94,8 +101,8 @@ Deno.test("calculate price example 2", () => {
   const priceCalculationService = new PriceCalculationService(
     visitorRepository,
   );
-  const visitorId = "1";
-  const visitor = new Visitor(visitorId);
+  const visitorId = "Kasey";
+  const visitor = new Visitor(visitorId, "Moon village");
   visitorRepository.save(visitor);
 
   // GIVEN
@@ -109,4 +116,28 @@ Deno.test("calculate price example 2", () => {
 
   // THEN
   assertEquals(price, 20);
+});
+
+Deno.test("calculate price example 3", () => {
+  // PREP
+  const visitorRepository = new InMemVisitorsRepository();
+  const visitService = new VisitService(visitorRepository);
+  const priceCalculationService = new PriceCalculationService(
+    visitorRepository,
+  );
+  const visitorId = "Aiden";
+  const visitor = new Visitor(visitorId, "Pineville");
+  visitorRepository.save(visitor);
+
+  // GIVEN
+  visitService.registerDelivery(visitorId, [{
+    type: "CONSTRUCTION",
+    weight: 200,
+  }]);
+
+  // WHEN
+  const price = priceCalculationService.calculate(visitorId);
+
+  // THEN
+  assertEquals(price, 10);
 });
