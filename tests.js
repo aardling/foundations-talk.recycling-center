@@ -5,7 +5,9 @@ class VisitService {
 }
 
 class PriceCalculationService {
-  calculate() {}
+  calculate() {
+    return 0;
+  }
 }
 Deno.test("price should be 0 when nothing is delivered", () => {
   // PREP
