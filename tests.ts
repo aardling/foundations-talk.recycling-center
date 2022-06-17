@@ -145,3 +145,35 @@ Deno.test("calculate price example 3", () => {
   // THEN
   assertEquals(price, 10);
 });
+Deno.test("calculate price example 4", () => {
+  // PREP
+  const visitorRepository = new InMemVisitorsRepository();
+  const visitService = new VisitService(visitorRepository);
+  const priceCalculationService = new PriceCalculationService(
+    visitorRepository,
+  );
+  const visitorId = "Aiden";
+  const visitor = new Visitor(visitorId, "Pineville");
+  visitorRepository.save(visitor);
+
+  // GIVEN
+  visitService.registerDelivery(visitorId, [{
+    type: "CONSTRUCTION",
+    weight: 50,
+  }]);
+  visitService.registerDelivery(visitorId, [{
+    type: "CONSTRUCTION",
+    weight: 25,
+  }]);
+  visitService.registerDelivery(visitorId, [{
+    type: "CONSTRUCTION",
+    weight: 100,
+  }]);
+
+  // WHEN
+  const price = priceCalculationService.calculate(visitorId);
+
+  // THEN
+  assertEquals(price, 75 * 0.2);
+});
+
