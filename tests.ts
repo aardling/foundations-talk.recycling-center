@@ -1,7 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.143.0/testing/asserts.ts";
 
 class VisitService {
-  registerDelivery() {}
+  registerDelivery(_deliveries: any[]) {}
 }
 
 class PriceCalculationService {
