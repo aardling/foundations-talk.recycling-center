@@ -72,7 +72,7 @@ class PriceCalculationService {
         lastWeight = lastWeight - Math.max((100 - previousWeight), 0)
       }
     }
-    return lastWeight * 0.1;
+    return Math.max(lastWeight * 0.1, 0)
   }
 }
 
@@ -219,5 +219,23 @@ Deno.test("calculate price example 5", () => {
   assertEquals(price, 10);
 });
 
-// todo example should not be below 0
-// todo example exemption should be saved
+Deno.test("calculate price example 6", () => {
+  // PREP
+  const visitorId = "Aiden";
+  const { visitService, priceCalculationService } = testSetup(
+    visitorId,
+    "Pineville",
+  );
+
+  // GIVEN
+  visitService.registerDelivery(visitorId, [{
+    type: "CONSTRUCTION",
+    weight: 25,
+  }]);
+
+  // WHEN
+  const price = priceCalculationService.calculate(visitorId);
+
+  // THEN
+  assertEquals(price, 0);
+});
