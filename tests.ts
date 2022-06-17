@@ -27,7 +27,7 @@ class Visitor {
   }
 
   get city() {
-    return this._city
+    return this._city;
   }
 }
 
@@ -77,16 +77,24 @@ class InMemVisitorsRepository implements VisitorsRepository {
   }
 }
 
-Deno.test("calculate price example 1", () => {
-  // PREP
+function testSetup(visitorId: string, city: string) {
   const visitorRepository = new InMemVisitorsRepository();
   const visitService = new VisitService(visitorRepository);
   const priceCalculationService = new PriceCalculationService(
     visitorRepository,
   );
-  const visitorId = "Kasey";
-  const visitor = new Visitor(visitorId, "Moon village");
+  const visitor = new Visitor(visitorId, city);
   visitorRepository.save(visitor);
+  return { visitService, priceCalculationService };
+}
+
+Deno.test("calculate price example 1", () => {
+  // PREP
+  const visitorId = "Kasey";
+  const { visitService, priceCalculationService } = testSetup(
+    visitorId,
+    "Moon village",
+  );
 
   // GIVEN
   visitService.registerDelivery(visitorId, []);
@@ -100,14 +108,11 @@ Deno.test("calculate price example 1", () => {
 
 Deno.test("calculate price example 2", () => {
   // PREP
-  const visitorRepository = new InMemVisitorsRepository();
-  const visitService = new VisitService(visitorRepository);
-  const priceCalculationService = new PriceCalculationService(
-    visitorRepository,
-  );
   const visitorId = "Kasey";
-  const visitor = new Visitor(visitorId, "Moon village");
-  visitorRepository.save(visitor);
+  const { visitService, priceCalculationService } = testSetup(
+    visitorId,
+    "Moon village",
+  );
 
   // GIVEN
   visitService.registerDelivery(visitorId, [{
@@ -124,14 +129,11 @@ Deno.test("calculate price example 2", () => {
 
 Deno.test("calculate price example 3", () => {
   // PREP
-  const visitorRepository = new InMemVisitorsRepository();
-  const visitService = new VisitService(visitorRepository);
-  const priceCalculationService = new PriceCalculationService(
-    visitorRepository,
-  );
   const visitorId = "Aiden";
-  const visitor = new Visitor(visitorId, "Pineville");
-  visitorRepository.save(visitor);
+  const { visitService, priceCalculationService } = testSetup(
+    visitorId,
+    "Pineville",
+  );
 
   // GIVEN
   visitService.registerDelivery(visitorId, [{
@@ -145,16 +147,14 @@ Deno.test("calculate price example 3", () => {
   // THEN
   assertEquals(price, 10);
 });
+
 Deno.test("calculate price example 4", () => {
   // PREP
-  const visitorRepository = new InMemVisitorsRepository();
-  const visitService = new VisitService(visitorRepository);
-  const priceCalculationService = new PriceCalculationService(
-    visitorRepository,
-  );
   const visitorId = "Aiden";
-  const visitor = new Visitor(visitorId, "Pineville");
-  visitorRepository.save(visitor);
+  const { visitService, priceCalculationService } = testSetup(
+    visitorId,
+    "Pineville",
+  );
 
   // GIVEN
   visitService.registerDelivery(visitorId, [{
