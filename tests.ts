@@ -57,13 +57,14 @@ class PriceCalculationService {
   calculate(id: string) {
     const visitor = this.visitorRepository.findById(id);
     const deliveries = visitor!.deliveries;
-    return deliveries.reduce((price, delivery) => {
-      let weight = delivery.weight;
-      if (visitor!.city === "Pineville") {
-        weight = weight - 100;
-      }
-      return price + (weight * 0.1);
-    }, 0);
+    let totalWeight = deliveries.reduce<number>(
+      (total, { weight }) => total + weight,
+      0,
+    );
+    if (visitor!.city === "Pineville") {
+      totalWeight = totalWeight - 100;
+    }
+    return totalWeight * 0.1;
   }
 }
 
@@ -174,6 +175,8 @@ Deno.test("calculate price example 4", () => {
   const price = priceCalculationService.calculate(visitorId);
 
   // THEN
-  assertEquals(price, 75 * 0.2);
+  assertEquals(price, 7.5);
 });
 
+// todo example should not be below 0
+// todo example exemption should be saved
