@@ -9,7 +9,7 @@ class PriceCalculationService {
     return 0;
   }
 }
-Deno.test("price should be 0 when nothing is delivered", () => {
+Deno.test("calculate price example 1", () => {
   // PREP
   const visitService = new VisitService();
   const priceCalculationService = new PriceCalculationService();
@@ -22,4 +22,19 @@ Deno.test("price should be 0 when nothing is delivered", () => {
 
   // THEN
   assert(price == 0);
+});
+
+Deno.test("calculate price example 2", () => {
+  // PREP
+  const visitService = new VisitService();
+  const priceCalculationService = new PriceCalculationService();
+
+  // GIVEN
+  visitService.registerDelivery([{deliveryType: "CONSTRUCTION", weight: 200}]);
+
+  // WHEN
+  const price = priceCalculationService.calculate();
+
+  // THEN
+  assert(price == 0.2);
 });
