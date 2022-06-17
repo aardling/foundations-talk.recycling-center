@@ -61,10 +61,18 @@ class PriceCalculationService {
       (total, { weight }) => total + weight,
       0,
     );
+    let lastWeight = deliveries[deliveries.length - 1]?.weight || 0;
+    let previousWeight = totalWeight - lastWeight;
     if (visitor!.city === "Pineville") {
-      totalWeight = totalWeight - 100;
+      if (lastWeight == totalWeight) {
+        lastWeight = lastWeight - 100;
+      } else if (previousWeight > 100) {
+        // do nothing
+      } else {
+        lastWeight = lastWeight - Math.max((100 - previousWeight), 0)
+      }
     }
-    return totalWeight * 0.1;
+    return lastWeight * 0.1;
   }
 }
 
@@ -176,6 +184,39 @@ Deno.test("calculate price example 4", () => {
 
   // THEN
   assertEquals(price, 7.5);
+});
+
+Deno.test("calculate price example 5", () => {
+  // PREP
+  const visitorId = "Aiden";
+  const { visitService, priceCalculationService } = testSetup(
+    visitorId,
+    "Pineville",
+  );
+
+  // GIVEN
+  visitService.registerDelivery(visitorId, [{
+    type: "CONSTRUCTION",
+    weight: 50,
+  }]);
+  visitService.registerDelivery(visitorId, [{
+    type: "CONSTRUCTION",
+    weight: 25,
+  }]);
+  visitService.registerDelivery(visitorId, [{
+    type: "CONSTRUCTION",
+    weight: 100,
+  }]);
+  visitService.registerDelivery(visitorId, [{
+    type: "CONSTRUCTION",
+    weight: 100,
+  }]);
+
+  // WHEN
+  const price = priceCalculationService.calculate(visitorId);
+
+  // THEN
+  assertEquals(price, 10);
 });
 
 // todo example should not be below 0
