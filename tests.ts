@@ -7,6 +7,11 @@ import Inhabitant from "./src/domain/Inhabitant.ts";
 import VisitService from "./src/domain/VisitService.ts";
 import HouseholdRepository from "./src/domain/HouseholdRepository.ts";
 import Household from "./src/domain/Household.ts";
+import Weight from "./src/domain/Weight.ts";
+import CalculationRules, {
+  ExemptionRule,
+} from "./src/domain/CalculationRules.ts";
+import { fractionType } from "./src/domain/Delivery.ts";
 
 class InMemHouseholdRepository implements HouseholdRepository {
   private households: { [key: string]: Household } = {};
@@ -23,14 +28,34 @@ class InMemHouseholdRepository implements HouseholdRepository {
   findByInhabitant(inhabitant: Inhabitant): Household {
     return this.householdsByInhabitant[inhabitant.id];
   }
+}
+class InMemCalculationRules implements CalculationRules {
+  private readonly exemptionRules: { [key: string]: ExemptionRule } = {};
+  addExemptionRule(exemptionRule: ExemptionRule): void {
+    this.exemptionRules[
+      this.key(exemptionRule.city, exemptionRule.fractionType)
+    ] = exemptionRule;
+  }
+  findExemptionRule(city: string, fractionType: fractionType): ExemptionRule {
+    return this.exemptionRules[this.key(city, fractionType)]!;
+  }
+
+  private key(city: string, fractionType: string) {
+    return `${city}-${fractionType}`;
   }
 }
 
 function testSetup(inhabitant: Inhabitant) {
   const householdRepository = new InMemHouseholdRepository();
+  const calculationRules = new InMemCalculationRules();
+  calculationRules.addExemptionRule(
+    new ExemptionRule("Pineville", "CONSTRUCTION", new Weight(100, "Kg"))
+  );
   const visitService = new VisitService(householdRepository);
+
   const priceCalculationService = new PriceCalculationService(
-    householdRepository
+    householdRepository,
+    calculationRules
   );
   const houseHold = new Household(inhabitant.address);
   houseHold.addInhabitant(inhabitant);

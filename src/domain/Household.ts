@@ -44,4 +44,9 @@ export default class Household {
   get city() {
     return this._address.city;
   }
+
+  allFractionsOfCurrentDelivery(): deliveredFraction[] {
+    let currentYear = this.deliveriesOfCurrentYear;
+    return currentYear[currentYear.length - 1].deliveredFractions;
+  }
 }

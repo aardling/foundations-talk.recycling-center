@@ -1,65 +1,43 @@
-import { deliveredFraction } from "./Delivery.ts";
+import { deliveredFraction, fractionType } from "./Delivery.ts";
 import HouseholdRepository from "./HouseholdRepository.ts";
 import Household from "./Household.ts";
 import Inhabitant from "./Inhabitant.ts";
+import Weight from "./Weight.ts";
+import CalculationRules from "./CalculationRules.ts";
 
 export default class PriceCalculationService {
   private readonly householdRepository: HouseholdRepository;
-  constructor(householdRepository: HouseholdRepository) {
-    this.householdRepository = householdRepository;
-  }
-  calculateFraction(
-    household: Household,
-    type: string,
-    deliveries: deliveredFraction[],
-    price: number
+  private readonly calculationRules: CalculationRules;
+  constructor(
+    householdRepository: HouseholdRepository,
+    calculationRules: CalculationRules
   ) {
-    let totalWeight = deliveries.reduce<number>(
-      (total, { weight }) => total + weight,
-      0
-    );
-    let lastWeight = deliveries[deliveries.length - 1]?.weight || 0;
-    let previousWeight = totalWeight - lastWeight;
-    if (household.city === "Pineville" && type === "CONSTRUCTION") {
-      if (lastWeight == totalWeight) {
-        lastWeight = lastWeight - 100;
-      } else if (previousWeight > 100) {
-        // do nothing
-      } else {
-        lastWeight = lastWeight - Math.max(100 - previousWeight, 0);
-      }
-    }
-    return Math.max(lastWeight * price, 0);
+    this.householdRepository = householdRepository;
+    this.calculationRules = calculationRules;
   }
+
   calculate(inhabitant: Inhabitant) {
     const pricePerType: { [key: string]: number } = {
       CONSTRUCTION: 0.1,
       "GREEN WASTE": 0.2,
     };
     const household = this.householdRepository.findByInhabitant(inhabitant);
-    const deliveries = household.deliveriesOfCurrentYear;
-    const deliveryPerType = deliveries.reduce(
-      (perType: { [key: string]: deliveredFraction[] }, delivery) => {
-        delivery.deliveredFractions.forEach((delivery) => {
-          if (!perType[delivery.type]) {
-            perType[delivery.type] = [];
-          }
-          perType[delivery.type].push(delivery);
-        });
-        return perType;
-      },
-      {}
-    );
-    return Object.keys(deliveryPerType)
-      .map((type) => {
-        const price: number = pricePerType[type]!;
-        return this.calculateFraction(
-          household,
-          type,
-          deliveryPerType[type],
-          price
+
+    let allFractions = household
+      .allFractionsOfCurrentDelivery()
+      .map((deliveredFraction) => {
+        let rule = this.calculationRules.findExemptionRule(
+          household.city,
+          deliveredFraction.type
         );
-      })
-      .reduce((sum, price) => sum + price, 0);
+        if (rule) {
+          return rule.calculate(household, deliveredFraction);
+        }
+        return deliveredFraction;
+      });
+
+    return allFractions.reduce((sum, fraction) => {
+      return sum + pricePerType[fraction.type] * fraction.weight;
+    }, 0);
   }
 }
