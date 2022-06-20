@@ -1,4 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.143.0/testing/asserts.ts";
+import DeliveryDate from "./src/domain/DeliveryDate.ts";
 
 type deliveredFraction = {
   weight: number;
@@ -155,6 +156,8 @@ function testSetup(visitorId: string, city: string) {
   return { visitService, priceCalculationService };
 }
 
+const deliveryDate = new DeliveryDate("2022-06-20")
+
 Deno.test("calculate price example 1", () => {
   // PREP
   const visitorId = "Kasey";
@@ -164,7 +167,7 @@ Deno.test("calculate price example 1", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, []);
+  visitService.registerDelivery2(visitorId, [], deliveryDate);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -182,12 +185,12 @@ Deno.test("calculate price example 2", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, [
+  visitService.registerDelivery2(visitorId, [
     {
       type: "CONSTRUCTION",
       weight: 200,
     },
-  ]);
+  ], deliveryDate);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -205,12 +208,12 @@ Deno.test("calculate price example 3", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, [
+  visitService.registerDelivery2(visitorId, [
     {
       type: "CONSTRUCTION",
       weight: 200,
     },
-  ]);
+  ], deliveryDate);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -228,24 +231,24 @@ Deno.test("calculate price example 4", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, [
+  visitService.registerDelivery2(visitorId, [
     {
       type: "CONSTRUCTION",
       weight: 50,
     },
-  ]);
-  visitService.registerDelivery(visitorId, [
+  ], deliveryDate);
+  visitService.registerDelivery2(visitorId, [
     {
       type: "CONSTRUCTION",
       weight: 25,
     },
-  ]);
-  visitService.registerDelivery(visitorId, [
+  ], deliveryDate);
+  visitService.registerDelivery2(visitorId, [
     {
       type: "CONSTRUCTION",
       weight: 100,
     },
-  ]);
+  ], deliveryDate);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -263,30 +266,30 @@ Deno.test("calculate price example 5", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, [
+  visitService.registerDelivery2(visitorId, [
     {
       type: "CONSTRUCTION",
       weight: 50,
     },
-  ]);
-  visitService.registerDelivery(visitorId, [
+  ], deliveryDate);
+  visitService.registerDelivery2(visitorId, [
     {
       type: "CONSTRUCTION",
       weight: 25,
     },
-  ]);
-  visitService.registerDelivery(visitorId, [
+  ], deliveryDate);
+  visitService.registerDelivery2(visitorId, [
     {
       type: "CONSTRUCTION",
       weight: 100,
     },
-  ]);
-  visitService.registerDelivery(visitorId, [
+  ], deliveryDate);
+  visitService.registerDelivery2(visitorId, [
     {
       type: "CONSTRUCTION",
       weight: 100,
     },
-  ]);
+  ], deliveryDate);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -304,12 +307,12 @@ Deno.test("calculate price example 6", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, [
+  visitService.registerDelivery2(visitorId, [
     {
       type: "CONSTRUCTION",
       weight: 25,
     },
-  ]);
+  ], deliveryDate);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -327,18 +330,18 @@ Deno.test("calculate price example 7", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, [
+  visitService.registerDelivery2(visitorId, [
     {
       type: "CONSTRUCTION",
       weight: 25,
     },
-  ]);
-  visitService.registerDelivery(visitorId, [
+  ], deliveryDate);
+  visitService.registerDelivery2(visitorId, [
     {
       type: "GREEN WASTE",
       weight: 100,
     },
-  ]);
+  ], deliveryDate);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -346,20 +349,6 @@ Deno.test("calculate price example 7", () => {
   // THEN
   assertEquals(price, 20);
 });
-
-// we have 2 new requirements:
-// 1. the exemptions are calculated per year, so every calendar year you get the exemptions again
-// 2. the exemptions are calculated per household (based on address), so multiple people living together get the exemptions only 1 time
-
-class DeliveryDate {
-  private readonly date: string;
-  constructor(date: string) {
-    this.date = date;
-  }
-  inCalendarYear(calendarYear: string) {
-    return false;
-  }
-}
 
 Deno.test("calculate price example 8", () => {
   // PREP
