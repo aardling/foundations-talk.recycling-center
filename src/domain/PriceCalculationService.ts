@@ -1,6 +1,7 @@
 import { deliveredFraction } from "./Delivery.ts";
 import HouseholdRepository from "./HouseholdRepository.ts";
 import Household from "./Household.ts";
+import Inhabitant from "./Inhabitant.ts";
 
 export default class PriceCalculationService {
   private readonly householdRepository: HouseholdRepository;
@@ -30,12 +31,12 @@ export default class PriceCalculationService {
     }
     return Math.max(lastWeight * price, 0);
   }
-  calculate(id: string) {
+  calculate(inhabitant: Inhabitant) {
     const pricePerType: { [key: string]: number } = {
       CONSTRUCTION: 0.1,
       "GREEN WASTE": 0.2,
     };
-    const household = this.householdRepository.findByinhabitantId(id)!;
+    const household = this.householdRepository.findByInhabitant(inhabitant);
     const deliveries = household.deliveriesOfCurrentYear;
     const deliveryPerType = deliveries.reduce(
       (perType: { [key: string]: deliveredFraction[] }, delivery) => {
