@@ -2,6 +2,8 @@ import HouseholdRepository from "./HouseholdRepository.ts";
 import Inhabitant from "./Inhabitant.ts";
 import CalculationRules from "./CalculationRules.ts";
 import { Price } from "./Price.ts";
+import Household from "./Household.ts";
+import { deliveredFraction } from "./Delivery.ts";
 
 export default class PriceCalculationService {
   private readonly householdRepository: HouseholdRepository;
@@ -19,17 +21,22 @@ export default class PriceCalculationService {
 
     let allPrices = household
       .allFractionsOfCurrentDelivery()
-      .map((deliveredFraction) => {
-        return this.calculationRules
-          .findExemptionRule(household.city, deliveredFraction.type)
-          .calculate(household, deliveredFraction);
-      })
-      .map((fractionToPayFor) => {
-        return this.calculationRules
-          .findCalculationRule(household.city, fractionToPayFor.type)
-          .calculate(fractionToPayFor);
-      });
+      .map((deliveredFraction) =>
+        this.calculateForFraction(household, deliveredFraction)
+      );
 
     return Price.total(allPrices);
+  }
+
+  private calculateForFraction(
+    household: Household,
+    deliveredFraction: deliveredFraction
+  ) {
+    let fractionWithoutExemption = this.calculationRules
+      .findExemptionRule(household.city, deliveredFraction.type)
+      .calculate(household, deliveredFraction);
+    return this.calculationRules
+      .findCalculationRule(household.city, fractionWithoutExemption.type)
+      .calculate(fractionWithoutExemption);
   }
 }
