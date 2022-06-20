@@ -23,8 +23,6 @@ class InMemHouseholdRepository implements HouseholdRepository {
   findByInhabitant(inhabitant: Inhabitant): Household {
     return this.householdsByInhabitant[inhabitant.id];
   }
-  findByinhabitantId(id: string): Household {
-    return this.householdsByInhabitant[id];
   }
 }
 
