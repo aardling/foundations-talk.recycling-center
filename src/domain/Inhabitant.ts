@@ -1,6 +1,6 @@
 import Address from "./Address.ts";
 
-export default class Visitor {
+export default class Inhabitant {
   private readonly _id: string;
   private readonly _address: Address;
 

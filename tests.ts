@@ -3,7 +3,7 @@ import { assertEquals } from "https://deno.land/std@0.143.0/testing/asserts.ts";
 import DeliveryDate from "./src/domain/DeliveryDate.ts";
 import Address from "./src/domain/Address.ts";
 import PriceCalculationService from "./src/domain/PriceCalculationService.ts";
-import Visitor from "./src/domain/Visitor.ts";
+import Inhabitant from "./src/domain/Inhabitant.ts";
 import VisitService from "./src/domain/VisitService.ts";
 import HouseholdRepository from "./src/domain/HouseholdRepository.ts";
 import Household from "./src/domain/Household.ts";
@@ -20,7 +20,7 @@ class InMemHouseholdRepository implements HouseholdRepository {
   findByAddress(address: Address): Household {
     return this.households[address.id];
   }
-  findByVisitor(visitor: Visitor): Household {
+  findByVisitor(visitor: Inhabitant): Household {
     return this.householdsByVisitor[visitor.id];
   }
   findByVisitorId(id: string): Household {
@@ -34,7 +34,7 @@ function testSetup(visitorId: string, address: Address) {
   const priceCalculationService = new PriceCalculationService(
     householdRepository
   );
-  const visitor = new Visitor(visitorId, address);
+  const visitor = new Inhabitant(visitorId, address);
   const houseHold = new Household(address);
   houseHold.addInhabitant(visitor);
   householdRepository.save(houseHold);
@@ -357,7 +357,7 @@ Deno.test("calculate price example 9", () => {
   // PREP
   const { householdRepository, visitService, priceCalculationService } =
     testSetup(aiden.visitorId, aiden.address);
-  const johnVisitor = new Visitor(john.visitorId, john.address);
+  const johnVisitor = new Inhabitant(john.visitorId, john.address);
   const household = householdRepository.findByAddress(john.address);
   household.addInhabitant(johnVisitor);
   householdRepository.save(household);

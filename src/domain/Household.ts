@@ -1,17 +1,17 @@
 import Address from "./Address.ts";
 import { deliveredFraction, delivery } from "./Delivery.ts";
 import DeliveryDate from "./DeliveryDate.ts";
-import Visitor from "./Visitor.ts";
+import Inhabitant from "./Inhabitant.ts";
 
 export default class Household {
   private readonly _address: Address;
-  private readonly _inhabitants: Visitor[] = [];
+  private readonly _inhabitants: Inhabitant[] = [];
   private readonly _deliveries: delivery[] = [];
 
   constructor(address: Address) {
     this._address = address;
   }
-  addInhabitant(visitor: Visitor) {
+  addInhabitant(visitor: Inhabitant) {
     if (this._address.isSame(visitor.address)) {
       this._inhabitants.push(visitor);
     } else {
