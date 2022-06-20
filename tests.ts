@@ -431,5 +431,5 @@ Deno.test("calculate price example 8", () => {
   const price = priceCalculationService.calculate(visitorId);
 
   // THEN
-  assertEquals(price, 50);
+  assertEquals(price, 5);
 });
