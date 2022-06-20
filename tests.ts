@@ -5,19 +5,8 @@ import Address from "./src/domain/Address.ts";
 import PriceCalculationService from "./src/domain/PriceCalculationService.ts";
 import Visitor from "./src/domain/Visitor.ts";
 import VisitService from "./src/domain/VisitService.ts";
-import VisitorsRepository from "./src/domain/VisitorsRepository.ts";
 import HouseholdRepository from "./src/domain/HouseholdRepository.ts";
 import Household from "./src/domain/Household.ts";
-
-class InMemVisitorsRepository implements VisitorsRepository {
-  private visitors: { [key: string]: Visitor } = {};
-  save(visitor: Visitor): void {
-    this.visitors[visitor.id] = visitor;
-  }
-  findById(id: string): Visitor | null {
-    return this.visitors[id];
-  }
-}
 
 class InMemHouseholdRepository implements HouseholdRepository {
   private households: { [key: string]: Household } = {};
@@ -40,21 +29,17 @@ class InMemHouseholdRepository implements HouseholdRepository {
 }
 
 function testSetup(visitorId: string, address: Address) {
-  const visitorRepository = new InMemVisitorsRepository();
   const householdRepository = new InMemHouseholdRepository();
-  const visitService = new VisitService(visitorRepository, householdRepository);
+  const visitService = new VisitService(householdRepository);
   const priceCalculationService = new PriceCalculationService(
-    visitorRepository,
     householdRepository
   );
   const visitor = new Visitor(visitorId, address);
-  visitorRepository.save(visitor);
   const houseHold = new Household(address);
   houseHold.addInhabitant(visitor);
   householdRepository.save(houseHold);
   return {
     householdRepository,
-    visitorRepository,
     visitService,
     priceCalculationService,
   };
@@ -378,8 +363,8 @@ Deno.test("calculate price example 9", () => {
   householdRepository.save(household);
 
   // GIVEN
-  visitService.registerDeliveryForHousehold(
-    aiden.address,
+  visitService.registerDelivery(
+    aiden.visitorId,
     [
       {
         type: "CONSTRUCTION",
@@ -388,8 +373,8 @@ Deno.test("calculate price example 9", () => {
     ],
     new DeliveryDate("2022-04-07")
   );
-  visitService.registerDeliveryForHousehold(
-    john.address,
+  visitService.registerDelivery(
+    john.visitorId,
     [
       {
         type: "CONSTRUCTION",

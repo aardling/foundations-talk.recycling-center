@@ -1,16 +1,10 @@
-import VisitorsRepository from "./VisitorsRepository.ts";
 import { deliveredFraction } from "./Delivery.ts";
 import HouseholdRepository from "./HouseholdRepository.ts";
 import Household from "./Household.ts";
 
 export default class PriceCalculationService {
   private readonly householdRepository: HouseholdRepository;
-  visitorRepository: VisitorsRepository;
-  constructor(
-    visitorRepository: VisitorsRepository,
-    householdRepository: HouseholdRepository
-  ) {
-    this.visitorRepository = visitorRepository;
+  constructor(householdRepository: HouseholdRepository) {
     this.householdRepository = householdRepository;
   }
   calculateFraction(
