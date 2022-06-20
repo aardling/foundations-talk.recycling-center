@@ -6,6 +6,8 @@ import PriceCalculationService from "./src/domain/PriceCalculationService.ts";
 import Visitor from "./src/domain/Visitor.ts";
 import VisitService from "./src/domain/VisitService.ts";
 import VisitorsRepository from "./src/domain/VisitorsRepository.ts";
+import HouseholdRepository from "./src/domain/HouseholdRepository.ts";
+import Household from "./src/domain/Household.ts";
 
 class InMemVisitorsRepository implements VisitorsRepository {
   private visitors: { [key: string]: Visitor } = {};
@@ -17,9 +19,19 @@ class InMemVisitorsRepository implements VisitorsRepository {
   }
 }
 
+class InMemHouseholdRepository implements HouseholdRepository {
+  private households: { [key: string]: Household } = {};
+  save(houseHold: Household): void {}
+  findById(id: string): Household {
+    return new Household();
+    // return this.visitors[id];
+  }
+}
+
 function testSetup(visitorId: string, address: Address) {
   const visitorRepository = new InMemVisitorsRepository();
-  const visitService = new VisitService(visitorRepository);
+  const householdRepository = new InMemHouseholdRepository();
+  const visitService = new VisitService(visitorRepository, householdRepository);
   const priceCalculationService = new PriceCalculationService(
     visitorRepository
   );
@@ -344,7 +356,7 @@ Deno.test("calculate price example 9", () => {
   visitorRepository.save(johnVisitor);
 
   // GIVEN
-  visitService.registerDelivery(
+  visitService.registerDeliveryForHousehold(
     aiden.visitorId,
     [
       {
@@ -354,7 +366,7 @@ Deno.test("calculate price example 9", () => {
     ],
     new DeliveryDate("2022-04-07")
   );
-  visitService.registerDelivery(
+  visitService.registerDeliveryForHousehold(
     john.visitorId,
     [
       {
