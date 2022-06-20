@@ -1,5 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.143.0/testing/asserts.ts";
 import DeliveryDate from "./src/domain/DeliveryDate.ts";
+import Address from "./src/domain/Address.ts";
 
 type deliveredFraction = {
   weight: number;
@@ -14,11 +15,11 @@ type delivery = {
 class Visitor {
   private _deliveries: delivery[] = [];
   private readonly _id: string;
-  private readonly _city: string;
+  private readonly _address: Address;
 
-  constructor(id: string, city: string) {
+  constructor(id: string, address: Address) {
     this._id = id;
-    this._city = city;
+    this._address = address;
   }
   addDelivery(
     deliveredFractions: deliveredFraction[],
@@ -32,11 +33,13 @@ class Visitor {
   }
 
   get deliveriesOfCurrentYear() {
-    return this._deliveries.filter(({deliveryDate}) => deliveryDate.inCalendarYear("2022"));
+    return this._deliveries.filter(({ deliveryDate }) =>
+      deliveryDate.inCalendarYear("2022")
+    );
   }
 
   get city() {
-    return this._city;
+    return this._address.city;
   }
 }
 
@@ -134,25 +137,35 @@ class InMemVisitorsRepository implements VisitorsRepository {
   }
 }
 
-function testSetup(visitorId: string, city: string) {
+function testSetup(visitorId: string, address: Address) {
   const visitorRepository = new InMemVisitorsRepository();
   const visitService = new VisitService(visitorRepository);
   const priceCalculationService = new PriceCalculationService(
     visitorRepository
   );
-  const visitor = new Visitor(visitorId, city);
+  const visitor = new Visitor(visitorId, address);
   visitorRepository.save(visitor);
   return { visitService, priceCalculationService };
 }
 
 const deliveryDate = new DeliveryDate("2022-06-20");
 
+const kasey = {
+  visitorId: "Kasey",
+  address: new Address("Eveningred 31", "Moon village"),
+};
+
+const aiden = {
+  visitorId: "Aiden",
+  address: new Address("Green Street 103", "Pineville"),
+};
+
 Deno.test("calculate price example 1", () => {
   // PREP
-  const visitorId = "Kasey";
+  const visitorId = kasey.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Moon village"
+    kasey.address
   );
 
   // GIVEN
@@ -167,10 +180,10 @@ Deno.test("calculate price example 1", () => {
 
 Deno.test("calculate price example 2", () => {
   // PREP
-  const visitorId = "Kasey";
+  const visitorId = kasey.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Moon village"
+    kasey.address
   );
 
   // GIVEN
@@ -194,10 +207,10 @@ Deno.test("calculate price example 2", () => {
 
 Deno.test("calculate price example 3", () => {
   // PREP
-  const visitorId = "Aiden";
+  const visitorId = aiden.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Pineville"
+    aiden.address
   );
 
   // GIVEN
@@ -221,10 +234,10 @@ Deno.test("calculate price example 3", () => {
 
 Deno.test("calculate price example 4", () => {
   // PREP
-  const visitorId = "Aiden";
+  const visitorId = aiden.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Pineville"
+    aiden.address
   );
 
   // GIVEN
@@ -268,10 +281,10 @@ Deno.test("calculate price example 4", () => {
 
 Deno.test("calculate price example 5", () => {
   // PREP
-  const visitorId = "Aiden";
+  const visitorId = aiden.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Pineville"
+    aiden.address
   );
 
   // GIVEN
@@ -325,10 +338,10 @@ Deno.test("calculate price example 5", () => {
 
 Deno.test("calculate price example 6", () => {
   // PREP
-  const visitorId = "Aiden";
+  const visitorId = aiden.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Pineville"
+    aiden.address
   );
 
   // GIVEN
@@ -352,10 +365,10 @@ Deno.test("calculate price example 6", () => {
 
 Deno.test("calculate price example 7", () => {
   // PREP
-  const visitorId = "Aiden";
+  const visitorId = aiden.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Pineville"
+    aiden.address
   );
 
   // GIVEN
@@ -393,10 +406,10 @@ Deno.test("calculate price example 7", () => {
 
 Deno.test("calculate price example 8", () => {
   // PREP
-  const visitorId = "Aiden";
+  const visitorId = aiden.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Pineville"
+    aiden.address
   );
 
   // GIVEN
