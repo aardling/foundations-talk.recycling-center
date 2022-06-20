@@ -31,7 +31,7 @@ class Visitor {
     return this._id;
   }
 
-  get deliveries() {
+  get deliveriesOfCurrentYear() {
     return this._deliveries.filter(({deliveryDate}) => deliveryDate.inCalendarYear("2022"));
   }
 
@@ -93,7 +93,7 @@ class PriceCalculationService {
   }
   calculate(id: string) {
     const visitor = this.visitorRepository.findById(id)!;
-    const deliveries = visitor!.deliveries;
+    const deliveries = visitor!.deliveriesOfCurrentYear;
     const deliveryPerType = deliveries.reduce(
       (perType: { [key: string]: deliveredFraction[] }, delivery) => {
         delivery.deliveredFractions.forEach((delivery) => {
