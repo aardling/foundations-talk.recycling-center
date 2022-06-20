@@ -11,9 +11,9 @@ export default class Household {
   constructor(address: Address) {
     this._address = address;
   }
-  addInhabitant(visitor: Inhabitant) {
-    if (this._address.isSame(visitor.address)) {
-      this._inhabitants.push(visitor);
+  addInhabitant(inhabitant: Inhabitant) {
+    if (inhabitant.livesOn(this._address)) {
+      this._inhabitants.push(inhabitant);
     } else {
       throw AggregateError(
         "Can only add inhabitants that live on the same address"

@@ -13,7 +13,7 @@ export default class Inhabitant {
     return this._id;
   }
 
-  get address() {
-    return this._address;
+  livesOn(_address: Address) {
+    return this._address.isSame(_address);
   }
 }
