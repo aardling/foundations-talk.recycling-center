@@ -20,13 +20,7 @@ class Visitor {
     this._id = id;
     this._city = city;
   }
-  addDelivery(deliveredFractions: deliveredFraction[]) {
-    this._deliveries = this._deliveries.concat({
-      deliveryDate: new DeliveryDate("TODO"),
-      deliveredFractions,
-    });
-  }
-  addDelivery2(
+  addDelivery(
     deliveredFractions: deliveredFraction[],
     deliveryDate: DeliveryDate
   ) {
@@ -52,24 +46,19 @@ interface VisitorsRepository {
 }
 
 class VisitService {
-  registerDelivery2(
+  private readonly visitorRepository;
+  constructor(visitorRepository: VisitorsRepository) {
+    this.visitorRepository = visitorRepository;
+  }
+
+  registerDelivery(
     visitorId: string,
     deliveries: deliveredFraction[],
     deliveryDate: DeliveryDate
   ) {
     const visitor = this.visitorRepository.findById(visitorId);
     // we ignore that the id might  be invalid
-    visitor!.addDelivery2(deliveries, deliveryDate);
-    this.visitorRepository.save(visitor!);
-  }
-  private readonly visitorRepository;
-  constructor(visitorRepository: VisitorsRepository) {
-    this.visitorRepository = visitorRepository;
-  }
-  registerDelivery(id: string, deliveries: deliveredFraction[]) {
-    const visitor = this.visitorRepository.findById(id);
-    // we ignore that the id might  be invalid
-    visitor!.addDelivery(deliveries);
+    visitor!.addDelivery(deliveries, deliveryDate);
     this.visitorRepository.save(visitor!);
   }
 }
@@ -156,7 +145,7 @@ function testSetup(visitorId: string, city: string) {
   return { visitService, priceCalculationService };
 }
 
-const deliveryDate = new DeliveryDate("2022-06-20")
+const deliveryDate = new DeliveryDate("2022-06-20");
 
 Deno.test("calculate price example 1", () => {
   // PREP
@@ -167,7 +156,7 @@ Deno.test("calculate price example 1", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery2(visitorId, [], deliveryDate);
+  visitService.registerDelivery(visitorId, [], deliveryDate);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -185,12 +174,16 @@ Deno.test("calculate price example 2", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery2(visitorId, [
-    {
-      type: "CONSTRUCTION",
-      weight: 200,
-    },
-  ], deliveryDate);
+  visitService.registerDelivery(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 200,
+      },
+    ],
+    deliveryDate
+  );
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -208,12 +201,16 @@ Deno.test("calculate price example 3", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery2(visitorId, [
-    {
-      type: "CONSTRUCTION",
-      weight: 200,
-    },
-  ], deliveryDate);
+  visitService.registerDelivery(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 200,
+      },
+    ],
+    deliveryDate
+  );
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -231,24 +228,36 @@ Deno.test("calculate price example 4", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery2(visitorId, [
-    {
-      type: "CONSTRUCTION",
-      weight: 50,
-    },
-  ], deliveryDate);
-  visitService.registerDelivery2(visitorId, [
-    {
-      type: "CONSTRUCTION",
-      weight: 25,
-    },
-  ], deliveryDate);
-  visitService.registerDelivery2(visitorId, [
-    {
-      type: "CONSTRUCTION",
-      weight: 100,
-    },
-  ], deliveryDate);
+  visitService.registerDelivery(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 50,
+      },
+    ],
+    deliveryDate
+  );
+  visitService.registerDelivery(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 25,
+      },
+    ],
+    deliveryDate
+  );
+  visitService.registerDelivery(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 100,
+      },
+    ],
+    deliveryDate
+  );
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -266,30 +275,46 @@ Deno.test("calculate price example 5", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery2(visitorId, [
-    {
-      type: "CONSTRUCTION",
-      weight: 50,
-    },
-  ], deliveryDate);
-  visitService.registerDelivery2(visitorId, [
-    {
-      type: "CONSTRUCTION",
-      weight: 25,
-    },
-  ], deliveryDate);
-  visitService.registerDelivery2(visitorId, [
-    {
-      type: "CONSTRUCTION",
-      weight: 100,
-    },
-  ], deliveryDate);
-  visitService.registerDelivery2(visitorId, [
-    {
-      type: "CONSTRUCTION",
-      weight: 100,
-    },
-  ], deliveryDate);
+  visitService.registerDelivery(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 50,
+      },
+    ],
+    deliveryDate
+  );
+  visitService.registerDelivery(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 25,
+      },
+    ],
+    deliveryDate
+  );
+  visitService.registerDelivery(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 100,
+      },
+    ],
+    deliveryDate
+  );
+  visitService.registerDelivery(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 100,
+      },
+    ],
+    deliveryDate
+  );
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -307,12 +332,16 @@ Deno.test("calculate price example 6", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery2(visitorId, [
-    {
-      type: "CONSTRUCTION",
-      weight: 25,
-    },
-  ], deliveryDate);
+  visitService.registerDelivery(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 25,
+      },
+    ],
+    deliveryDate
+  );
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -330,18 +359,26 @@ Deno.test("calculate price example 7", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery2(visitorId, [
-    {
-      type: "CONSTRUCTION",
-      weight: 25,
-    },
-  ], deliveryDate);
-  visitService.registerDelivery2(visitorId, [
-    {
-      type: "GREEN WASTE",
-      weight: 100,
-    },
-  ], deliveryDate);
+  visitService.registerDelivery(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 25,
+      },
+    ],
+    deliveryDate
+  );
+  visitService.registerDelivery(
+    visitorId,
+    [
+      {
+        type: "GREEN WASTE",
+        weight: 100,
+      },
+    ],
+    deliveryDate
+  );
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -359,7 +396,7 @@ Deno.test("calculate price example 8", () => {
   );
 
   // GIVEN
-  visitService.registerDelivery2(
+  visitService.registerDelivery(
     visitorId,
     [
       {
@@ -369,7 +406,7 @@ Deno.test("calculate price example 8", () => {
     ],
     new DeliveryDate("2021-10-02")
   );
-  visitService.registerDelivery2(
+  visitService.registerDelivery(
     visitorId,
     [
       {
@@ -379,7 +416,7 @@ Deno.test("calculate price example 8", () => {
     ],
     new DeliveryDate("2022-04-07")
   );
-  visitService.registerDelivery2(
+  visitService.registerDelivery(
     visitorId,
     [
       {
