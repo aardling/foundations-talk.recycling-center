@@ -1,9 +1,10 @@
 import DeliveryDate from "./DeliveryDate.ts";
+import Weight from "./Weight.ts";
 
 export type fractionType = "CONSTRUCTION" | "GREEN WASTE";
 
 export type deliveredFraction = {
-  weight: number;
+  weight: Weight;
   type: fractionType;
 };
 

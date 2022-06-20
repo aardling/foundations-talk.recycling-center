@@ -1,8 +1,5 @@
-import { deliveredFraction, fractionType } from "./Delivery.ts";
 import HouseholdRepository from "./HouseholdRepository.ts";
-import Household from "./Household.ts";
 import Inhabitant from "./Inhabitant.ts";
-import Weight from "./Weight.ts";
 import CalculationRules from "./CalculationRules.ts";
 
 export default class PriceCalculationService {
@@ -37,7 +34,7 @@ export default class PriceCalculationService {
       });
 
     return allFractions.reduce((sum, fraction) => {
-      return sum + pricePerType[fraction.type] * fraction.weight;
+      return sum + pricePerType[fraction.type] * fraction.weight.amount;
     }, 0);
   }
 }

@@ -12,4 +12,9 @@ export default class Weight {
   add(other: Weight) {
     return new Weight(this._amount + other.amount, "Kg");
   }
+
+  subtractWithMinimumOfZero(other: Weight) {
+    let new_amount = Math.max(0, this._amount - other.amount);
+    return new Weight(new_amount, "Kg");
+  }
 }

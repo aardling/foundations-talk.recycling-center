@@ -19,10 +19,9 @@ export class ExemptionRule {
     if (household.city === this._city) {
       return {
         type: deliveredFraction.type,
-        weight: new Weight(
-          deliveredFraction.weight - this.exemption.amount,
-          "Kg"
-        ).amount,
+        weight: deliveredFraction.weight.subtractWithMinimumOfZero(
+          this.exemption
+        ),
       };
     }
     return deliveredFraction;

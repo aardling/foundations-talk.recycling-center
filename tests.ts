@@ -45,11 +45,17 @@ class InMemCalculationRules implements CalculationRules {
   }
 }
 
+const Kg25 = new Weight(25, "Kg");
+const Kg50 = new Weight(50, "Kg");
+const Kg100 = new Weight(100, "Kg");
+const Kg150 = new Weight(150, "Kg");
+const Kg200 = new Weight(200, "Kg");
+
 function testSetup(inhabitant: Inhabitant) {
   const householdRepository = new InMemHouseholdRepository();
   const calculationRules = new InMemCalculationRules();
   calculationRules.addExemptionRule(
-    new ExemptionRule("Pineville", "CONSTRUCTION", new Weight(100, "Kg"))
+    new ExemptionRule("Pineville", "CONSTRUCTION", Kg100)
   );
   const visitService = new VisitService(householdRepository);
 
@@ -108,7 +114,7 @@ Deno.test("calculate price example 2", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 200,
+        weight: Kg200,
       },
     ],
     deliveryDate
@@ -131,7 +137,7 @@ Deno.test("calculate price example 3", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 200,
+        weight: Kg200,
       },
     ],
     deliveryDate
@@ -154,7 +160,7 @@ Deno.test("calculate price example 4", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 50,
+        weight: Kg50,
       },
     ],
     deliveryDate
@@ -164,7 +170,7 @@ Deno.test("calculate price example 4", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 25,
+        weight: Kg25,
       },
     ],
     deliveryDate
@@ -174,7 +180,7 @@ Deno.test("calculate price example 4", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 100,
+        weight: Kg100,
       },
     ],
     deliveryDate
@@ -197,7 +203,7 @@ Deno.test("calculate price example 5", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 50,
+        weight: Kg50,
       },
     ],
     deliveryDate
@@ -207,7 +213,7 @@ Deno.test("calculate price example 5", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 25,
+        weight: Kg25,
       },
     ],
     deliveryDate
@@ -217,7 +223,7 @@ Deno.test("calculate price example 5", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 100,
+        weight: Kg100,
       },
     ],
     deliveryDate
@@ -227,7 +233,7 @@ Deno.test("calculate price example 5", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 100,
+        weight: Kg100,
       },
     ],
     deliveryDate
@@ -250,7 +256,7 @@ Deno.test("calculate price example 6", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 25,
+        weight: Kg25,
       },
     ],
     deliveryDate
@@ -273,7 +279,7 @@ Deno.test("calculate price example 7", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 25,
+        weight: Kg25,
       },
     ],
     deliveryDate
@@ -283,7 +289,7 @@ Deno.test("calculate price example 7", () => {
     [
       {
         type: "GREEN WASTE",
-        weight: 100,
+        weight: Kg100,
       },
     ],
     deliveryDate
@@ -310,7 +316,7 @@ Deno.test("calculate price example 8", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 150,
+        weight: Kg150,
       },
     ],
     new DeliveryDate("2021-10-02")
@@ -320,7 +326,7 @@ Deno.test("calculate price example 8", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 50,
+        weight: Kg50,
       },
     ],
     new DeliveryDate("2022-04-07")
@@ -330,7 +336,7 @@ Deno.test("calculate price example 8", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 100,
+        weight: Kg100,
       },
     ],
     new DeliveryDate("2022-06-22")
@@ -357,7 +363,7 @@ Deno.test("calculate price example 9", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 50,
+        weight: Kg50,
       },
     ],
     new DeliveryDate("2022-04-07")
@@ -367,7 +373,7 @@ Deno.test("calculate price example 9", () => {
     [
       {
         type: "CONSTRUCTION",
-        weight: 100,
+        weight: Kg100,
       },
     ],
     new DeliveryDate("2022-06-22")
