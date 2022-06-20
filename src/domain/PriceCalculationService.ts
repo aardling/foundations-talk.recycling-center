@@ -22,13 +22,13 @@ export default class PriceCalculationService {
     let allPrices = household
       .allFractionsOfCurrentDelivery()
       .map((deliveredFraction) =>
-        this.calculateForFraction(household, deliveredFraction)
+        this.calculatePriceOfDeliveredFraction(household, deliveredFraction)
       );
 
     return Price.total(allPrices);
   }
 
-  private calculateForFraction(
+  private calculatePriceOfDeliveredFraction(
     household: Household,
     deliveredFraction: deliveredFraction
   ) {
