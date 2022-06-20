@@ -9,6 +9,7 @@ import HouseholdRepository from "./src/domain/HouseholdRepository.ts";
 import Household from "./src/domain/Household.ts";
 import Weight from "./src/domain/Weight.ts";
 import CalculationRules, {
+  NoExemptionRule,
   ExemptionRule,
 } from "./src/domain/CalculationRules.ts";
 import { fractionType } from "./src/domain/Delivery.ts";
@@ -37,7 +38,9 @@ class InMemCalculationRules implements CalculationRules {
     ] = exemptionRule;
   }
   findExemptionRule(city: string, fractionType: fractionType): ExemptionRule {
-    return this.exemptionRules[this.key(city, fractionType)]!;
+    return (
+      this.exemptionRules[this.key(city, fractionType)] || new NoExemptionRule()
+    );
   }
 
   private key(city: string, fractionType: string) {

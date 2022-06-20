@@ -23,14 +23,9 @@ export default class PriceCalculationService {
     let allFractions = household
       .allFractionsOfCurrentDelivery()
       .map((deliveredFraction) => {
-        let rule = this.calculationRules.findExemptionRule(
-          household.city,
-          deliveredFraction.type
-        );
-        if (rule) {
-          return rule.calculate(household, deliveredFraction);
-        }
-        return deliveredFraction;
+        return this.calculationRules
+          .findExemptionRule(household.city, deliveredFraction.type)
+          .calculate(household, deliveredFraction);
       });
 
     return allFractions.reduce((sum, fraction) => {

@@ -2,6 +2,15 @@ import { fractionType, deliveredFraction } from "./Delivery.ts";
 import Household from "./Household.ts";
 import Weight from "./Weight.ts";
 
+export class NoExemptionRule {
+  calculate(
+    household: Household,
+    deliveredFraction: deliveredFraction
+  ): deliveredFraction {
+    return deliveredFraction;
+  }
+}
+
 export class ExemptionRule {
   private readonly _city: string;
   private readonly _fractionType: string;
