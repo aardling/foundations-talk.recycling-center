@@ -1,8 +1,13 @@
 import { assertEquals } from "https://deno.land/std@0.143.0/testing/asserts.ts";
 
-type delivery = {
+type deliveredFraction = {
   weight: number;
   type: string;
+};
+
+type delivery = {
+  deliveryDate: DeliveryDate;
+  deliveredFractions: deliveredFraction[];
 };
 
 class Visitor {
@@ -14,8 +19,17 @@ class Visitor {
     this._id = id;
     this._city = city;
   }
-  addDelivery(deliveries: delivery[]) {
-    this._deliveries = this._deliveries.concat(deliveries);
+  addDelivery(deliveredFractions: deliveredFraction[]) {
+    this._deliveries = this._deliveries.concat({
+      deliveryDate: new DeliveryDate("TODO"),
+      deliveredFractions,
+    });
+  }
+  addDelivery2(
+    deliveredFractions: deliveredFraction[],
+    deliveryDate: DeliveryDate
+  ) {
+    this._deliveries.push({ deliveryDate, deliveredFractions });
   }
 
   get id() {
@@ -37,11 +51,21 @@ interface VisitorsRepository {
 }
 
 class VisitService {
+  registerDelivery2(
+    visitorId: string,
+    deliveries: deliveredFraction[],
+    deliveryDate: DeliveryDate
+  ) {
+    const visitor = this.visitorRepository.findById(visitorId);
+    // we ignore that the id might  be invalid
+    visitor!.addDelivery2(deliveries, deliveryDate);
+    this.visitorRepository.save(visitor!);
+  }
   private readonly visitorRepository;
   constructor(visitorRepository: VisitorsRepository) {
     this.visitorRepository = visitorRepository;
   }
-  registerDelivery(id: string, deliveries: delivery[]) {
+  registerDelivery(id: string, deliveries: deliveredFraction[]) {
     const visitor = this.visitorRepository.findById(id);
     // we ignore that the id might  be invalid
     visitor!.addDelivery(deliveries);
@@ -57,12 +81,12 @@ class PriceCalculationService {
   calculateFraction(
     visitor: Visitor,
     type: string,
-    deliveries: delivery[],
-    price: number,
+    deliveries: deliveredFraction[],
+    price: number
   ) {
     let totalWeight = deliveries.reduce<number>(
       (total, { weight }) => total + weight,
-      0,
+      0
     );
     let lastWeight = deliveries[deliveries.length - 1]?.weight || 0;
     let previousWeight = totalWeight - lastWeight;
@@ -81,28 +105,32 @@ class PriceCalculationService {
     const visitor = this.visitorRepository.findById(id)!;
     const deliveries = visitor!.deliveries;
     const deliveryPerType = deliveries.reduce(
-      (perType: { [key: string]: delivery[] }, delivery) => {
-        if (!perType[delivery.type]) {
-          perType[delivery.type] = [];
-        }
-        perType[delivery.type].push(delivery);
+      (perType: { [key: string]: deliveredFraction[] }, delivery) => {
+        delivery.deliveredFractions.forEach((delivery) => {
+          if (!perType[delivery.type]) {
+            perType[delivery.type] = [];
+          }
+          perType[delivery.type].push(delivery);
+        });
         return perType;
       },
-      {},
+      {}
     );
     const pricePerType: { [key: string]: number } = {
-      "CONSTRUCTION": 0.1,
+      CONSTRUCTION: 0.1,
       "GREEN WASTE": 0.2,
     };
-    return Object.keys(deliveryPerType).map((type) => {
-      const price: number = pricePerType[type]!;
-      return this.calculateFraction(
-        visitor,
-        type,
-        deliveryPerType[type],
-        price,
-      );
-    }).reduce((sum, price) => sum + price, 0);
+    return Object.keys(deliveryPerType)
+      .map((type) => {
+        const price: number = pricePerType[type]!;
+        return this.calculateFraction(
+          visitor,
+          type,
+          deliveryPerType[type],
+          price
+        );
+      })
+      .reduce((sum, price) => sum + price, 0);
   }
 }
 
@@ -120,7 +148,7 @@ function testSetup(visitorId: string, city: string) {
   const visitorRepository = new InMemVisitorsRepository();
   const visitService = new VisitService(visitorRepository);
   const priceCalculationService = new PriceCalculationService(
-    visitorRepository,
+    visitorRepository
   );
   const visitor = new Visitor(visitorId, city);
   visitorRepository.save(visitor);
@@ -132,7 +160,7 @@ Deno.test("calculate price example 1", () => {
   const visitorId = "Kasey";
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Moon village",
+    "Moon village"
   );
 
   // GIVEN
@@ -150,14 +178,16 @@ Deno.test("calculate price example 2", () => {
   const visitorId = "Kasey";
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Moon village",
+    "Moon village"
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, [{
-    type: "CONSTRUCTION",
-    weight: 200,
-  }]);
+  visitService.registerDelivery(visitorId, [
+    {
+      type: "CONSTRUCTION",
+      weight: 200,
+    },
+  ]);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -171,14 +201,16 @@ Deno.test("calculate price example 3", () => {
   const visitorId = "Aiden";
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Pineville",
+    "Pineville"
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, [{
-    type: "CONSTRUCTION",
-    weight: 200,
-  }]);
+  visitService.registerDelivery(visitorId, [
+    {
+      type: "CONSTRUCTION",
+      weight: 200,
+    },
+  ]);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -192,22 +224,28 @@ Deno.test("calculate price example 4", () => {
   const visitorId = "Aiden";
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Pineville",
+    "Pineville"
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, [{
-    type: "CONSTRUCTION",
-    weight: 50,
-  }]);
-  visitService.registerDelivery(visitorId, [{
-    type: "CONSTRUCTION",
-    weight: 25,
-  }]);
-  visitService.registerDelivery(visitorId, [{
-    type: "CONSTRUCTION",
-    weight: 100,
-  }]);
+  visitService.registerDelivery(visitorId, [
+    {
+      type: "CONSTRUCTION",
+      weight: 50,
+    },
+  ]);
+  visitService.registerDelivery(visitorId, [
+    {
+      type: "CONSTRUCTION",
+      weight: 25,
+    },
+  ]);
+  visitService.registerDelivery(visitorId, [
+    {
+      type: "CONSTRUCTION",
+      weight: 100,
+    },
+  ]);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -221,26 +259,34 @@ Deno.test("calculate price example 5", () => {
   const visitorId = "Aiden";
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Pineville",
+    "Pineville"
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, [{
-    type: "CONSTRUCTION",
-    weight: 50,
-  }]);
-  visitService.registerDelivery(visitorId, [{
-    type: "CONSTRUCTION",
-    weight: 25,
-  }]);
-  visitService.registerDelivery(visitorId, [{
-    type: "CONSTRUCTION",
-    weight: 100,
-  }]);
-  visitService.registerDelivery(visitorId, [{
-    type: "CONSTRUCTION",
-    weight: 100,
-  }]);
+  visitService.registerDelivery(visitorId, [
+    {
+      type: "CONSTRUCTION",
+      weight: 50,
+    },
+  ]);
+  visitService.registerDelivery(visitorId, [
+    {
+      type: "CONSTRUCTION",
+      weight: 25,
+    },
+  ]);
+  visitService.registerDelivery(visitorId, [
+    {
+      type: "CONSTRUCTION",
+      weight: 100,
+    },
+  ]);
+  visitService.registerDelivery(visitorId, [
+    {
+      type: "CONSTRUCTION",
+      weight: 100,
+    },
+  ]);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -254,14 +300,16 @@ Deno.test("calculate price example 6", () => {
   const visitorId = "Aiden";
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Pineville",
+    "Pineville"
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, [{
-    type: "CONSTRUCTION",
-    weight: 25,
-  }]);
+  visitService.registerDelivery(visitorId, [
+    {
+      type: "CONSTRUCTION",
+      weight: 25,
+    },
+  ]);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
@@ -275,22 +323,87 @@ Deno.test("calculate price example 7", () => {
   const visitorId = "Aiden";
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    "Pineville",
+    "Pineville"
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, [{
-    type: "CONSTRUCTION",
-    weight: 25,
-  }]);
-  visitService.registerDelivery(visitorId, [{
-    type: "GREEN WASTE",
-    weight: 100,
-  }]);
+  visitService.registerDelivery(visitorId, [
+    {
+      type: "CONSTRUCTION",
+      weight: 25,
+    },
+  ]);
+  visitService.registerDelivery(visitorId, [
+    {
+      type: "GREEN WASTE",
+      weight: 100,
+    },
+  ]);
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
 
   // THEN
   assertEquals(price, 20);
+});
+
+// we have 2 new requirements:
+// 1. the exemptions are calculated per year, so every calendar year you get the exemptions again
+// 2. the exemptions are calculated per household (based on address), so multiple people living together get the exemptions only 1 time
+
+class DeliveryDate {
+  private readonly date: string;
+  constructor(date: string) {
+    this.date = date;
+  }
+  inCalendarYear(calendarYear: string) {
+    return false;
+  }
+}
+
+Deno.test("calculate price example 8", () => {
+  // PREP
+  const visitorId = "Aiden";
+  const { visitService, priceCalculationService } = testSetup(
+    visitorId,
+    "Pineville"
+  );
+
+  // GIVEN
+  visitService.registerDelivery2(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 150,
+      },
+    ],
+    new DeliveryDate("2021-10-02")
+  );
+  visitService.registerDelivery2(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 50,
+      },
+    ],
+    new DeliveryDate("2022-04-07")
+  );
+  visitService.registerDelivery2(
+    visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 100,
+      },
+    ],
+    new DeliveryDate("2022-06-22")
+  );
+
+  // WHEN
+  const price = priceCalculationService.calculate(visitorId);
+
+  // THEN
+  assertEquals(price, 50);
 });
