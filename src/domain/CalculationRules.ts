@@ -32,10 +32,7 @@ export class ExemptionRule {
     const pastWeight = Weight.sum(
       allPreviousFractions.map(({ weight }) => weight)
     );
-    if (
-      household.city === this._city &&
-      this.exemption.biggerThan(pastWeight)
-    ) {
+    if (household.inCity(this._city) && this.exemption.biggerThan(pastWeight)) {
       const remainingExemption =
         this.exemption.subtractWithMinimumOfZero(pastWeight);
       return {

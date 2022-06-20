@@ -42,6 +42,9 @@ export default class Household {
   get city() {
     return this._address.city;
   }
+  inCity(city: string) {
+    return city === this._address.city;
+  }
 
   allFractionsOfCurrentDelivery(): deliveredFraction[] {
     return this.deliveriesOfCurrentYear[this.deliveriesOfCurrentYear.length - 1]
