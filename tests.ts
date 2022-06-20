@@ -32,7 +32,7 @@ class Visitor {
   }
 
   get deliveries() {
-    return this._deliveries;
+    return this._deliveries.filter(({deliveryDate}) => deliveryDate.inCalendarYear("2022"));
   }
 
   get city() {

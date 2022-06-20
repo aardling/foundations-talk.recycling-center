@@ -7,6 +7,6 @@ export default class DeliveryDate {
     this.date = date;
   }
   inCalendarYear(calendarYear: string) {
-    return false;
+    return this.date.startsWith(calendarYear)
   }
 }
