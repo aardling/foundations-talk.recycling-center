@@ -5,5 +5,6 @@ import Visitor from "./Visitor.ts";
 export default interface HouseholdRepository {
   save(houseHold: Household): void;
   findByVisitor(visitor: Visitor): Household;
+  findByVisitorId(id: string): Household;
   findByAddress(address: Address): Household;
 }

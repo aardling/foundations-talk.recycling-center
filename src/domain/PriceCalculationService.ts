@@ -1,14 +1,20 @@
 import VisitorsRepository from "./VisitorsRepository.ts";
-import Visitor from "./Visitor.ts";
 import { deliveredFraction } from "./Delivery.ts";
+import HouseholdRepository from "./HouseholdRepository.ts";
+import Household from "./Household.ts";
 
 export default class PriceCalculationService {
-  private readonly visitorRepository;
-  constructor(visitorRepository: VisitorsRepository) {
+  private readonly householdRepository: HouseholdRepository;
+  visitorRepository: VisitorsRepository;
+  constructor(
+    visitorRepository: VisitorsRepository,
+    householdRepository: HouseholdRepository
+  ) {
     this.visitorRepository = visitorRepository;
+    this.householdRepository = householdRepository;
   }
   calculateFraction(
-    visitor: Visitor,
+    household: Household,
     type: string,
     deliveries: deliveredFraction[],
     price: number
@@ -19,7 +25,7 @@ export default class PriceCalculationService {
     );
     let lastWeight = deliveries[deliveries.length - 1]?.weight || 0;
     let previousWeight = totalWeight - lastWeight;
-    if (visitor.city === "Pineville" && type === "CONSTRUCTION") {
+    if (household.city === "Pineville" && type === "CONSTRUCTION") {
       if (lastWeight == totalWeight) {
         lastWeight = lastWeight - 100;
       } else if (previousWeight > 100) {
@@ -31,8 +37,12 @@ export default class PriceCalculationService {
     return Math.max(lastWeight * price, 0);
   }
   calculate(id: string) {
-    const visitor = this.visitorRepository.findById(id)!;
-    const deliveries = visitor!.deliveriesOfCurrentYear;
+    const pricePerType: { [key: string]: number } = {
+      CONSTRUCTION: 0.1,
+      "GREEN WASTE": 0.2,
+    };
+    const household = this.householdRepository.findByVisitorId(id)!;
+    const deliveries = household.deliveriesOfCurrentYear;
     const deliveryPerType = deliveries.reduce(
       (perType: { [key: string]: deliveredFraction[] }, delivery) => {
         delivery.deliveredFractions.forEach((delivery) => {
@@ -45,15 +55,11 @@ export default class PriceCalculationService {
       },
       {}
     );
-    const pricePerType: { [key: string]: number } = {
-      CONSTRUCTION: 0.1,
-      "GREEN WASTE": 0.2,
-    };
     return Object.keys(deliveryPerType)
       .map((type) => {
         const price: number = pricePerType[type]!;
         return this.calculateFraction(
-          visitor,
+          household,
           type,
           deliveryPerType[type],
           price
