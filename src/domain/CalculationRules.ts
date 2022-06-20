@@ -16,12 +16,24 @@ export class ExemptionRule {
     household: Household,
     deliveredFraction: deliveredFraction
   ): deliveredFraction {
-    if (household.city === this._city) {
+    const allPreviousFractions = household.pastFractions(
+      deliveredFraction.type
+    );
+    const pastWeight = Weight.sum(
+      allPreviousFractions.map(({ weight }) => weight)
+    );
+    if (
+      household.city === this._city &&
+      this.exemption.biggerThan(pastWeight)
+    ) {
+      const remainingExemption =
+        this.exemption.subtractWithMinimumOfZero(pastWeight);
       return {
         type: deliveredFraction.type,
-        weight: deliveredFraction.weight.subtractWithMinimumOfZero(
-          this.exemption
-        ),
+        weight:
+          deliveredFraction.weight.subtractWithMinimumOfZero(
+            remainingExemption
+          ),
       };
     }
     return deliveredFraction;

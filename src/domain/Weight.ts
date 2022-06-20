@@ -5,6 +5,11 @@ export default class Weight {
     this._amount = amount;
   }
 
+  static sum(all: Weight[]) {
+    let totalAmount = all.reduce((sum, current) => sum + current.amount, 0);
+    return new Weight(totalAmount, "Kg");
+  }
+
   get amount() {
     return this._amount;
   }
@@ -16,5 +21,9 @@ export default class Weight {
   subtractWithMinimumOfZero(other: Weight) {
     let new_amount = Math.max(0, this._amount - other.amount);
     return new Weight(new_amount, "Kg");
+  }
+
+  biggerThan(other: Weight) {
+    return this.amount > other.amount;
   }
 }

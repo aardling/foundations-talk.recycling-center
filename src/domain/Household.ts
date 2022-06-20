@@ -35,10 +35,8 @@ export default class Household {
     return this._inhabitants;
   }
 
-  get deliveriesOfCurrentYear() {
-    return this._deliveries.filter(({ deliveryDate }) =>
-      deliveryDate.inCalendarYear("2022")
-    );
+  get pastDeliveriesOfCurrentYear(): delivery[] {
+    return this.deliveriesOfCurrentYear.slice(0, -1) || [];
   }
 
   get city() {
@@ -46,7 +44,21 @@ export default class Household {
   }
 
   allFractionsOfCurrentDelivery(): deliveredFraction[] {
-    let currentYear = this.deliveriesOfCurrentYear;
-    return currentYear[currentYear.length - 1].deliveredFractions;
+    return this.deliveriesOfCurrentYear[this.deliveriesOfCurrentYear.length - 1]
+      .deliveredFractions;
+  }
+
+  pastFractions(type: string) {
+    return this.pastDeliveriesOfCurrentYear.flatMap((delivery) => {
+      return delivery.deliveredFractions.filter(
+        (deliveredFraction) => deliveredFraction.type === type
+      );
+    });
+  }
+
+  private get deliveriesOfCurrentYear() {
+    return this._deliveries.filter(({ deliveryDate }) =>
+      deliveryDate.inCalendarYear("2022")
+    );
   }
 }
