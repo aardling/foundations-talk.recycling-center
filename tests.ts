@@ -10,33 +10,33 @@ import Household from "./src/domain/Household.ts";
 
 class InMemHouseholdRepository implements HouseholdRepository {
   private households: { [key: string]: Household } = {};
-  private householdsByVisitor: { [key: string]: Household } = {};
+  private householdsByInhabitant: { [key: string]: Household } = {};
   save(household: Household): void {
-    household.inhabitants.forEach((visitor) => {
-      this.householdsByVisitor[visitor.id] = household;
+    household.inhabitants.forEach((inhabitant) => {
+      this.householdsByInhabitant[inhabitant.id] = household;
     });
     this.households[household.id] = household;
   }
   findByAddress(address: Address): Household {
     return this.households[address.id];
   }
-  findByVisitor(visitor: Inhabitant): Household {
-    return this.householdsByVisitor[visitor.id];
+  findByInhabitant(inhabitant: Inhabitant): Household {
+    return this.householdsByInhabitant[inhabitant.id];
   }
-  findByVisitorId(id: string): Household {
-    return this.householdsByVisitor[id];
+  findByinhabitantId(id: string): Household {
+    return this.householdsByInhabitant[id];
   }
 }
 
-function testSetup(visitorId: string, address: Address) {
+function testSetup(inhabitantId: string, address: Address) {
   const householdRepository = new InMemHouseholdRepository();
   const visitService = new VisitService(householdRepository);
   const priceCalculationService = new PriceCalculationService(
     householdRepository
   );
-  const visitor = new Inhabitant(visitorId, address);
+  const inhabitant = new Inhabitant(inhabitantId, address);
   const houseHold = new Household(address);
-  houseHold.addInhabitant(visitor);
+  houseHold.addInhabitant(inhabitant);
   householdRepository.save(houseHold);
   return {
     householdRepository,
@@ -48,33 +48,33 @@ function testSetup(visitorId: string, address: Address) {
 const deliveryDate = new DeliveryDate("2022-06-20");
 
 const kasey = {
-  visitorId: "Kasey",
+  inhabitantId: "Kasey",
   address: new Address("Eveningred 31", "Moon village"),
 };
 
 const aiden = {
-  visitorId: "Aiden",
+  inhabitantId: "Aiden",
   address: new Address("Green Street 103", "Pineville"),
 };
 
 const john = {
-  visitorId: "John",
+  inhabitantId: "John",
   address: new Address("Green Street 103", "Pineville"),
 };
 
 Deno.test("calculate price example 1", () => {
   // PREP
-  const visitorId = kasey.visitorId;
+  const inhabitantId = kasey.inhabitantId;
   const { visitService, priceCalculationService } = testSetup(
-    visitorId,
+    inhabitantId,
     kasey.address
   );
 
   // GIVEN
-  visitService.registerDelivery(visitorId, [], deliveryDate);
+  visitService.registerDelivery(inhabitantId, [], deliveryDate);
 
   // WHEN
-  const price = priceCalculationService.calculate(visitorId);
+  const price = priceCalculationService.calculate(inhabitantId);
 
   // THEN
   assertEquals(price, 0);
@@ -82,15 +82,15 @@ Deno.test("calculate price example 1", () => {
 
 Deno.test("calculate price example 2", () => {
   // PREP
-  const visitorId = kasey.visitorId;
+  const inhabitantId = kasey.inhabitantId;
   const { visitService, priceCalculationService } = testSetup(
-    visitorId,
+    inhabitantId,
     kasey.address
   );
 
   // GIVEN
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -101,7 +101,7 @@ Deno.test("calculate price example 2", () => {
   );
 
   // WHEN
-  const price = priceCalculationService.calculate(visitorId);
+  const price = priceCalculationService.calculate(inhabitantId);
 
   // THEN
   assertEquals(price, 20);
@@ -109,15 +109,15 @@ Deno.test("calculate price example 2", () => {
 
 Deno.test("calculate price example 3", () => {
   // PREP
-  const visitorId = aiden.visitorId;
+  const inhabitantId = aiden.inhabitantId;
   const { visitService, priceCalculationService } = testSetup(
-    visitorId,
+    inhabitantId,
     aiden.address
   );
 
   // GIVEN
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -128,7 +128,7 @@ Deno.test("calculate price example 3", () => {
   );
 
   // WHEN
-  const price = priceCalculationService.calculate(visitorId);
+  const price = priceCalculationService.calculate(inhabitantId);
 
   // THEN
   assertEquals(price, 10);
@@ -136,15 +136,15 @@ Deno.test("calculate price example 3", () => {
 
 Deno.test("calculate price example 4", () => {
   // PREP
-  const visitorId = aiden.visitorId;
+  const inhabitantId = aiden.inhabitantId;
   const { visitService, priceCalculationService } = testSetup(
-    visitorId,
+    inhabitantId,
     aiden.address
   );
 
   // GIVEN
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -154,7 +154,7 @@ Deno.test("calculate price example 4", () => {
     deliveryDate
   );
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -164,7 +164,7 @@ Deno.test("calculate price example 4", () => {
     deliveryDate
   );
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -175,7 +175,7 @@ Deno.test("calculate price example 4", () => {
   );
 
   // WHEN
-  const price = priceCalculationService.calculate(visitorId);
+  const price = priceCalculationService.calculate(inhabitantId);
 
   // THEN
   assertEquals(price, 7.5);
@@ -183,15 +183,15 @@ Deno.test("calculate price example 4", () => {
 
 Deno.test("calculate price example 5", () => {
   // PREP
-  const visitorId = aiden.visitorId;
+  const inhabitantId = aiden.inhabitantId;
   const { visitService, priceCalculationService } = testSetup(
-    visitorId,
+    inhabitantId,
     aiden.address
   );
 
   // GIVEN
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -201,7 +201,7 @@ Deno.test("calculate price example 5", () => {
     deliveryDate
   );
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -211,7 +211,7 @@ Deno.test("calculate price example 5", () => {
     deliveryDate
   );
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -221,7 +221,7 @@ Deno.test("calculate price example 5", () => {
     deliveryDate
   );
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -232,7 +232,7 @@ Deno.test("calculate price example 5", () => {
   );
 
   // WHEN
-  const price = priceCalculationService.calculate(visitorId);
+  const price = priceCalculationService.calculate(inhabitantId);
 
   // THEN
   assertEquals(price, 10);
@@ -240,15 +240,15 @@ Deno.test("calculate price example 5", () => {
 
 Deno.test("calculate price example 6", () => {
   // PREP
-  const visitorId = aiden.visitorId;
+  const inhabitantId = aiden.inhabitantId;
   const { visitService, priceCalculationService } = testSetup(
-    visitorId,
+    inhabitantId,
     aiden.address
   );
 
   // GIVEN
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -259,7 +259,7 @@ Deno.test("calculate price example 6", () => {
   );
 
   // WHEN
-  const price = priceCalculationService.calculate(visitorId);
+  const price = priceCalculationService.calculate(inhabitantId);
 
   // THEN
   assertEquals(price, 0);
@@ -267,15 +267,15 @@ Deno.test("calculate price example 6", () => {
 
 Deno.test("calculate price example 7", () => {
   // PREP
-  const visitorId = aiden.visitorId;
+  const inhabitantId = aiden.inhabitantId;
   const { visitService, priceCalculationService } = testSetup(
-    visitorId,
+    inhabitantId,
     aiden.address
   );
 
   // GIVEN
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -285,7 +285,7 @@ Deno.test("calculate price example 7", () => {
     deliveryDate
   );
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "GREEN WASTE",
@@ -296,7 +296,7 @@ Deno.test("calculate price example 7", () => {
   );
 
   // WHEN
-  const price = priceCalculationService.calculate(visitorId);
+  const price = priceCalculationService.calculate(inhabitantId);
 
   // THEN
   assertEquals(price, 20);
@@ -308,15 +308,15 @@ Deno.test("calculate price example 7", () => {
 
 Deno.test("calculate price example 8", () => {
   // PREP
-  const visitorId = aiden.visitorId;
+  const inhabitantId = aiden.inhabitantId;
   const { visitService, priceCalculationService } = testSetup(
-    visitorId,
+    inhabitantId,
     aiden.address
   );
 
   // GIVEN
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -326,7 +326,7 @@ Deno.test("calculate price example 8", () => {
     new DeliveryDate("2021-10-02")
   );
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -336,7 +336,7 @@ Deno.test("calculate price example 8", () => {
     new DeliveryDate("2022-04-07")
   );
   visitService.registerDelivery(
-    visitorId,
+    inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -347,7 +347,7 @@ Deno.test("calculate price example 8", () => {
   );
 
   // WHEN
-  const price = priceCalculationService.calculate(visitorId);
+  const price = priceCalculationService.calculate(inhabitantId);
 
   // THEN
   assertEquals(price, 5);
@@ -356,15 +356,15 @@ Deno.test("calculate price example 8", () => {
 Deno.test("calculate price example 9", () => {
   // PREP
   const { householdRepository, visitService, priceCalculationService } =
-    testSetup(aiden.visitorId, aiden.address);
-  const johnVisitor = new Inhabitant(john.visitorId, john.address);
+    testSetup(aiden.inhabitantId, aiden.address);
+  const johnInhabitant = new Inhabitant(john.inhabitantId, john.address);
   const household = householdRepository.findByAddress(john.address);
-  household.addInhabitant(johnVisitor);
+  household.addInhabitant(johnInhabitant);
   householdRepository.save(household);
 
   // GIVEN
   visitService.registerDelivery(
-    aiden.visitorId,
+    aiden.inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -374,7 +374,7 @@ Deno.test("calculate price example 9", () => {
     new DeliveryDate("2022-04-07")
   );
   visitService.registerDelivery(
-    john.visitorId,
+    john.inhabitantId,
     [
       {
         type: "CONSTRUCTION",
@@ -385,7 +385,7 @@ Deno.test("calculate price example 9", () => {
   );
 
   // WHEN
-  const price = priceCalculationService.calculate(john.visitorId);
+  const price = priceCalculationService.calculate(john.inhabitantId);
 
   // THEN
   assertEquals(price, 5);

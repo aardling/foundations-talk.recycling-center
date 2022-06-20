@@ -35,7 +35,7 @@ export default class PriceCalculationService {
       CONSTRUCTION: 0.1,
       "GREEN WASTE": 0.2,
     };
-    const household = this.householdRepository.findByVisitorId(id)!;
+    const household = this.householdRepository.findByinhabitantId(id)!;
     const deliveries = household.deliveriesOfCurrentYear;
     const deliveryPerType = deliveries.reduce(
       (perType: { [key: string]: deliveredFraction[] }, delivery) => {

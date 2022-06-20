@@ -10,11 +10,11 @@ export default class VisitService {
   }
 
   registerDelivery(
-    visitorId: string,
+    inhabitantId: string,
     deliveries: deliveredFraction[],
     deliveryDate: DeliveryDate
   ) {
-    const household = this.householdRepository.findByVisitorId(visitorId);
+    const household = this.householdRepository.findByinhabitantId(inhabitantId);
     // we ignore that the id might  be invalid
     household.addDelivery(deliveries, deliveryDate);
     this.householdRepository.save(household);
