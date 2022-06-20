@@ -25,7 +25,7 @@ function testSetup(visitorId: string, address: Address) {
   );
   const visitor = new Visitor(visitorId, address);
   visitorRepository.save(visitor);
-  return { visitService, priceCalculationService };
+  return { visitorRepository, visitService, priceCalculationService };
 }
 
 const deliveryDate = new DeliveryDate("2022-06-20");
@@ -37,6 +37,11 @@ const kasey = {
 
 const aiden = {
   visitorId: "Aiden",
+  address: new Address("Green Street 103", "Pineville"),
+};
+
+const john = {
+  visitorId: "John",
   address: new Address("Green Street 103", "Pineville"),
 };
 
@@ -326,6 +331,42 @@ Deno.test("calculate price example 8", () => {
 
   // WHEN
   const price = priceCalculationService.calculate(visitorId);
+
+  // THEN
+  assertEquals(price, 5);
+});
+
+Deno.test("calculate price example 9", () => {
+  // PREP
+  const { visitService, priceCalculationService, visitorRepository } =
+    testSetup(aiden.visitorId, aiden.address);
+  const johnVisitor = new Visitor(john.visitorId, john.address);
+  visitorRepository.save(johnVisitor);
+
+  // GIVEN
+  visitService.registerDelivery(
+    aiden.visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 50,
+      },
+    ],
+    new DeliveryDate("2022-04-07")
+  );
+  visitService.registerDelivery(
+    john.visitorId,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 100,
+      },
+    ],
+    new DeliveryDate("2022-06-22")
+  );
+
+  // WHEN
+  const price = priceCalculationService.calculate(john.visitorId);
 
   // THEN
   assertEquals(price, 5);
