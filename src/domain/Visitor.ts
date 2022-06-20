@@ -29,6 +29,10 @@ export default class Visitor {
   }
 
   get city() {
-    return this._address.city;
+    return this.address.city;
+  }
+
+  get address() {
+    return this._address;
   }
 }

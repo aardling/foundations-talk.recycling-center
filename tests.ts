@@ -21,10 +21,18 @@ class InMemVisitorsRepository implements VisitorsRepository {
 
 class InMemHouseholdRepository implements HouseholdRepository {
   private households: { [key: string]: Household } = {};
-  save(houseHold: Household): void {}
-  findById(id: string): Household {
-    return new Household();
-    // return this.visitors[id];
+  private householdsByVisitor: { [key: string]: Household } = {};
+  save(household: Household): void {
+    household.inhabitants.forEach((visitor) => {
+      this.householdsByVisitor[visitor.id] = household;
+    });
+    this.households[household.id] = household;
+  }
+  findByAddress(address: Address): Household {
+    return this.households[address.id];
+  }
+  findByVisitor(visitor: Visitor): Household {
+    return this.householdsByVisitor[visitor.id];
   }
 }
 
@@ -37,7 +45,15 @@ function testSetup(visitorId: string, address: Address) {
   );
   const visitor = new Visitor(visitorId, address);
   visitorRepository.save(visitor);
-  return { visitorRepository, visitService, priceCalculationService };
+  const houseHold = new Household(address);
+  houseHold.addInhabitant(visitor);
+  householdRepository.save(houseHold);
+  return {
+    householdRepository,
+    visitorRepository,
+    visitService,
+    priceCalculationService,
+  };
 }
 
 const deliveryDate = new DeliveryDate("2022-06-20");
@@ -350,14 +366,16 @@ Deno.test("calculate price example 8", () => {
 
 Deno.test("calculate price example 9", () => {
   // PREP
-  const { visitService, priceCalculationService, visitorRepository } =
+  const { householdRepository, visitService, priceCalculationService } =
     testSetup(aiden.visitorId, aiden.address);
   const johnVisitor = new Visitor(john.visitorId, john.address);
-  visitorRepository.save(johnVisitor);
+  const household = householdRepository.findByAddress(john.address);
+  household.addInhabitant(johnVisitor);
+  householdRepository.save(household);
 
   // GIVEN
   visitService.registerDeliveryForHousehold(
-    aiden.visitorId,
+    aiden.address,
     [
       {
         type: "CONSTRUCTION",
@@ -367,7 +385,7 @@ Deno.test("calculate price example 9", () => {
     new DeliveryDate("2022-04-07")
   );
   visitService.registerDeliveryForHousehold(
-    john.visitorId,
+    john.address,
     [
       {
         type: "CONSTRUCTION",

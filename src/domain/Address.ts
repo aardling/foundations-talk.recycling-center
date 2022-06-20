@@ -10,4 +10,12 @@ export default class Address {
   get city() {
     return this._city;
   }
+
+  get id() {
+    return `${this.streetAndNumber} ${this._city}`;
+  }
+
+  isSame(other: Address) {
+    return this.id === other.id;
+  }
 }

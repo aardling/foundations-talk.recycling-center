@@ -2,6 +2,7 @@ import { deliveredFraction } from "./Delivery.ts";
 import DeliveryDate from "./DeliveryDate.ts";
 import VisitorsRepository from "./VisitorsRepository.ts";
 import HouseholdRepository from "./HouseholdRepository.ts";
+import Address from "./Address.ts";
 
 export default class VisitService {
   private readonly visitorRepository;
@@ -21,17 +22,18 @@ export default class VisitService {
     deliveryDate: DeliveryDate
   ) {
     const visitor = this.visitorRepository.findById(visitorId);
+    const household = this.householdRepository.findByVisitor(visitor!);
     // we ignore that the id might  be invalid
-    visitor!.addDelivery(deliveries, deliveryDate);
-    this.visitorRepository.save(visitor!);
+    household.addDelivery(deliveries, deliveryDate);
+    this.householdRepository.save(household);
   }
 
   registerDeliveryForHousehold(
-    visitorId: string,
+    address: Address,
     deliveries: deliveredFraction[],
     deliveryDate: DeliveryDate
   ) {
-    const houseHold = this.householdRepository.findById(visitorId);
+    const houseHold = this.householdRepository.findByAddress(address);
     // we ignore that the id might  be invalid
     houseHold.addDelivery(deliveries, deliveryDate);
     this.householdRepository.save(houseHold);
