@@ -1,5 +1,6 @@
 import { fractionType, deliveredFraction } from "./Delivery.ts";
 import Household from "./Household.ts";
+import { Price } from "./Price.ts";
 import Weight from "./Weight.ts";
 
 export class NoExemptionRule {
@@ -57,7 +58,29 @@ export class ExemptionRule {
   }
 }
 
+export class PriceCalculationRule {
+  private readonly _fractionType: string;
+  private readonly price: Price;
+  constructor(fractionType: fractionType, price: Price) {
+    this._fractionType = fractionType;
+    this.price = price;
+  }
+
+  calculate(deliveredFraction: deliveredFraction): Price {
+    return this.price.multipleByWeight(deliveredFraction.weight);
+  }
+
+  get fractionType() {
+    return this._fractionType;
+  }
+}
+
 export default interface CalculationRules {
   addExemptionRule(exemptionRule: ExemptionRule): void;
+  addPriceCalculationRule(priceCalculationRule: PriceCalculationRule): void;
   findExemptionRule(city: string, fractionType: fractionType): ExemptionRule;
+  findCalculationRule(
+    city: string,
+    fractionType: fractionType
+  ): PriceCalculationRule;
 }

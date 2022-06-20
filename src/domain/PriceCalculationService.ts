@@ -1,6 +1,7 @@
 import HouseholdRepository from "./HouseholdRepository.ts";
 import Inhabitant from "./Inhabitant.ts";
 import CalculationRules from "./CalculationRules.ts";
+import { Price } from "./Price.ts";
 
 export default class PriceCalculationService {
   private readonly householdRepository: HouseholdRepository;
@@ -14,22 +15,21 @@ export default class PriceCalculationService {
   }
 
   calculate(inhabitant: Inhabitant) {
-    const pricePerType: { [key: string]: number } = {
-      CONSTRUCTION: 0.1,
-      "GREEN WASTE": 0.2,
-    };
     const household = this.householdRepository.findByInhabitant(inhabitant);
 
-    let allFractions = household
+    let allPrices = household
       .allFractionsOfCurrentDelivery()
       .map((deliveredFraction) => {
         return this.calculationRules
           .findExemptionRule(household.city, deliveredFraction.type)
           .calculate(household, deliveredFraction);
+      })
+      .map((fractionToPayFor) => {
+        return this.calculationRules
+          .findCalculationRule(household.city, fractionToPayFor.type)
+          .calculate(fractionToPayFor);
       });
 
-    return allFractions.reduce((sum, fraction) => {
-      return sum + pricePerType[fraction.type] * fraction.weight.amount;
-    }, 0);
+    return Price.total(allPrices);
   }
 }

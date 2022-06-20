@@ -11,8 +11,10 @@ import Weight from "./src/domain/Weight.ts";
 import CalculationRules, {
   NoExemptionRule,
   ExemptionRule,
+  PriceCalculationRule,
 } from "./src/domain/CalculationRules.ts";
 import { fractionType } from "./src/domain/Delivery.ts";
+import { Price } from "./src/domain/Price.ts";
 
 class InMemHouseholdRepository implements HouseholdRepository {
   private households: { [key: string]: Household } = {};
@@ -32,6 +34,9 @@ class InMemHouseholdRepository implements HouseholdRepository {
 }
 class InMemCalculationRules implements CalculationRules {
   private readonly exemptionRules: { [key: string]: ExemptionRule } = {};
+  private readonly priceCalculationRules: {
+    [key: string]: PriceCalculationRule;
+  } = {};
   addExemptionRule(exemptionRule: ExemptionRule): void {
     this.exemptionRules[
       this.key(exemptionRule.city, exemptionRule.fractionType)
@@ -41,6 +46,17 @@ class InMemCalculationRules implements CalculationRules {
     return (
       this.exemptionRules[this.key(city, fractionType)] || new NoExemptionRule()
     );
+  }
+
+  addPriceCalculationRule(priceCalculationRule: PriceCalculationRule): void {
+    this.priceCalculationRules[priceCalculationRule.fractionType] =
+      priceCalculationRule;
+  }
+  findCalculationRule(
+    city: string,
+    fractionType: fractionType
+  ): PriceCalculationRule {
+    return this.priceCalculationRules[fractionType];
   }
 
   private key(city: string, fractionType: string) {
@@ -59,6 +75,12 @@ function testSetup(inhabitant: Inhabitant) {
   const calculationRules = new InMemCalculationRules();
   calculationRules.addExemptionRule(
     new ExemptionRule("Pineville", "CONSTRUCTION", Kg100)
+  );
+  calculationRules.addPriceCalculationRule(
+    new PriceCalculationRule("CONSTRUCTION", new Price(0.1, "EUR"))
+  );
+  calculationRules.addPriceCalculationRule(
+    new PriceCalculationRule("GREEN WASTE", new Price(0.2, "EUR"))
   );
   const visitService = new VisitService(householdRepository);
 
@@ -104,7 +126,7 @@ Deno.test("calculate price example 1", () => {
   const price = priceCalculationService.calculate(kasey);
 
   // THEN
-  assertEquals(price, 0);
+  assertEquals(price.amount, 0);
 });
 
 Deno.test("calculate price example 2", () => {
@@ -127,7 +149,7 @@ Deno.test("calculate price example 2", () => {
   const price = priceCalculationService.calculate(kasey);
 
   // THEN
-  assertEquals(price, 20);
+  assertEquals(price.amount, 20);
 });
 
 Deno.test("calculate price example 3", () => {
@@ -150,7 +172,7 @@ Deno.test("calculate price example 3", () => {
   const price = priceCalculationService.calculate(aiden);
 
   // THEN
-  assertEquals(price, 10);
+  assertEquals(price.amount, 10);
 });
 
 Deno.test("calculate price example 4", () => {
@@ -193,7 +215,7 @@ Deno.test("calculate price example 4", () => {
   const price = priceCalculationService.calculate(aiden);
 
   // THEN
-  assertEquals(price, 7.5);
+  assertEquals(price.amount, 7.5);
 });
 
 Deno.test("calculate price example 5", () => {
@@ -246,7 +268,7 @@ Deno.test("calculate price example 5", () => {
   const price = priceCalculationService.calculate(aiden);
 
   // THEN
-  assertEquals(price, 10);
+  assertEquals(price.amount, 10);
 });
 
 Deno.test("calculate price example 6", () => {
@@ -269,7 +291,7 @@ Deno.test("calculate price example 6", () => {
   const price = priceCalculationService.calculate(aiden);
 
   // THEN
-  assertEquals(price, 0);
+  assertEquals(price.amount, 0);
 });
 
 Deno.test("calculate price example 7", () => {
@@ -302,7 +324,7 @@ Deno.test("calculate price example 7", () => {
   const price = priceCalculationService.calculate(aiden);
 
   // THEN
-  assertEquals(price, 20);
+  assertEquals(price.amount, 20);
 });
 
 // we have 2 new requirements:
@@ -349,7 +371,7 @@ Deno.test("calculate price example 8", () => {
   const price = priceCalculationService.calculate(aiden);
 
   // THEN
-  assertEquals(price, 5);
+  assertEquals(price.amount, 5);
 });
 
 Deno.test("calculate price example 9", () => {
@@ -386,5 +408,5 @@ Deno.test("calculate price example 9", () => {
   const price = priceCalculationService.calculate(john);
 
   // THEN
-  assertEquals(price, 5);
+  assertEquals(price.amount, 5);
 });
