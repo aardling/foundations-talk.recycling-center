@@ -64,11 +64,11 @@ class InMemCalculationRules implements CalculationRules {
   }
 }
 
-const Kg25 = new Weight(25, "Kg");
-const Kg50 = new Weight(50, "Kg");
-const Kg100 = new Weight(100, "Kg");
-const Kg150 = new Weight(150, "Kg");
-const Kg200 = new Weight(200, "Kg");
+const Kg25 = new Weight(25, "kg");
+const Kg50 = new Weight(50, "kg");
+const Kg100 = new Weight(100, "kg");
+const Kg150 = new Weight(150, "kg");
+const Kg200 = new Weight(200, "kg");
 
 function testSetup(inhabitant: Inhabitant) {
   const householdRepository = new InMemHouseholdRepository();
