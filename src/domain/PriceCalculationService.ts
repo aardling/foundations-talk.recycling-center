@@ -20,9 +20,9 @@ export default class PriceCalculationService {
       CONSTRUCTION: new PriceCalculationRule(0.1),
       "GREEN WASTE": new PriceCalculationRule(0.2),
     };
-    const excemptionRules: { [key: string]: ExcemptionRule } = {
+    const excemptionRules: { [key: string]: ExcemptionCalculator } = {
       CONSTRUCTION: new ExcemptionRule("CONSTRUCTION", "Pineville", 100),
-      "GREEN WASTE": new ExcemptionRule("GREEN WASTE", "", 0),
+      "GREEN WASTE": new NoExcemptionRule(),
     };
     const household = this.householdRepository.findByVisitorId(id)!;
     const deliveredFractionHistory = household.deliveredFractionHistory;
@@ -46,7 +46,7 @@ export default class PriceCalculationService {
     household: Household,
     type: string,
     deliveries: deliveredFraction[],
-    excemptionRule: ExcemptionRule,
+    excemptionRule: ExcemptionCalculator,
     priceCalculationRule: PriceCalculationRule,
   ) {
     const weight = excemptionRule.calculate(type, household.city, deliveries);
@@ -54,7 +54,11 @@ export default class PriceCalculationService {
   }
 }
 
-class ExcemptionRule {
+interface ExcemptionCalculator {
+  calculate(type: string, city: string, deliveries: deliveredFraction[]) : number
+}
+
+class ExcemptionRule implements ExcemptionCalculator {
   private readonly _type: string;
   private readonly _city: string;
   private readonly _excemptionAmount: number;
@@ -81,6 +85,13 @@ class ExcemptionRule {
       }
     }
     return lastWeight;
+  }
+}
+
+class NoExcemptionRule implements ExcemptionCalculator {
+  calculate(_type: string, _city: string, deliveries: deliveredFraction[]) {
+    const lastWeight = deliveries[deliveries.length - 1]?.weight || 0;
+    return lastWeight
   }
 }
 
