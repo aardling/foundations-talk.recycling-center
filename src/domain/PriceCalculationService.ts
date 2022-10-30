@@ -17,22 +17,21 @@ export default class PriceCalculationService {
 
 
   calculate(id: string) {
-    const pricePerType: { [key: string]: number } = {
-      CONSTRUCTION: 0.1,
-      "GREEN WASTE": 0.2,
-    };
+    const priceRules: {[key: string]: PriceCalculationRule} = {
+      CONSTRUCTION: new PriceCalculationRule(0.1),
+      "GREEN WASTE": new PriceCalculationRule(0.2)
+    }
     const household = this.householdRepository.findByVisitorId(id)!;
     const deliveredFractionHistory = household.deliveredFractionHistory
     const deliveryPerType = deliveredFractionHistory.deliveriesOfCurrentYearPerType
 
     return Object.keys(deliveryPerType)
       .map((type) => {
-        const price: number = pricePerType[type]!;
         return this.calculateFraction(
           household,
           type,
           deliveryPerType[type],
-          price
+          priceRules[type]!
         );
       })
       .reduce((sum, price) => sum + price, 0);
@@ -43,10 +42,10 @@ export default class PriceCalculationService {
     household: Household,
     type: string,
     deliveries: deliveredFraction[],
-    price: number
+    priceCalculationRule: PriceCalculationRule
   ) {
     let weight = this.calculateExcemption(type, household.city, deliveries)
-    return this.calculatePrice(price, weight)
+    return priceCalculationRule.calculate(weight)
   }
 
   private calculateExcemption(type: string, city: string, deliveries: deliveredFraction[]) {
@@ -68,9 +67,15 @@ export default class PriceCalculationService {
     return lastWeight
 
   }
+}
 
-  private calculatePrice(price: number, weight: number) {
 
-    return Math.max(weight * price, 0);
+class PriceCalculationRule {
+  private readonly _price : number;
+  constructor(price: number) {
+    this._price = price;
+  }
+  calculate(weight: number) {
+    return Math.max(weight * this._price, 0)
   }
 }
