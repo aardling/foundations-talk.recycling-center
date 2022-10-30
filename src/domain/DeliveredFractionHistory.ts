@@ -1,5 +1,31 @@
 import { deliveredFraction, delivery } from "./Delivery.ts";
 
+export class CurrentDeliveryForCalculation {
+  private readonly _allDeliveredFractions: delivery[] = [];
+
+  constructor(allDeliveries: delivery[]) {
+    this._allDeliveredFractions = allDeliveries;
+  }
+
+  get allFractionTypes() {
+    return this.currentDelivery.deliveredFractions.map(
+      ({ type }) => type,
+    );
+  }
+  deliveredFractionsFor(searchType: string): deliveredFraction[] {
+    return this.deliveriesOfCurrentYear.flatMap(({deliveredFractions}) => deliveredFractions).filter(({type}) => type === searchType)
+  }
+
+  private get currentDelivery() {
+    return this._allDeliveredFractions[this._allDeliveredFractions.length - 1];
+  }
+  private get deliveriesOfCurrentYear() {
+    return this._allDeliveredFractions.filter(({ deliveryDate }) =>
+      deliveryDate.inCalendarYear("2022")
+    );
+  }
+}
+
 export default class DeliveredFractionHistory {
   private readonly _allDeliveredFractions: delivery[] = [];
 
@@ -15,7 +41,7 @@ export default class DeliveredFractionHistory {
 
   get deliveriesOfCurrentYearPerType() {
     const lastDeliveredFractionTypes = this.lastDelivery.deliveredFractions.map(
-      ({ type }) => type
+      ({ type }) => type,
     );
 
     return this.deliveriesOfCurrentYear.reduce(
@@ -37,5 +63,4 @@ export default class DeliveredFractionHistory {
   private get lastDelivery() {
     return this._allDeliveredFractions[this._allDeliveredFractions.length - 1];
   }
-
 }

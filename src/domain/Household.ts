@@ -36,6 +36,10 @@ export default class Household {
     return this._inhabitants;
   }
 
+  get deliveries() {
+    return this._deliveries
+  }
+
   get deliveredFractionHistory() {
     return new DeliveredFractionHistory(this._deliveries)
   }
