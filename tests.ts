@@ -5,39 +5,9 @@ import Address from "./src/domain/Address.ts";
 import PriceCalculationService from "./src/domain/PriceCalculationService.ts";
 import Visitor from "./src/domain/Visitor.ts";
 import VisitService from "./src/domain/VisitService.ts";
-import VisitorsRepository from "./src/domain/VisitorsRepository.ts";
-import HouseholdRepository from "./src/domain/HouseholdRepository.ts";
 import Household from "./src/domain/Household.ts";
-
-class InMemVisitorsRepository implements VisitorsRepository {
-  private visitors: { [key: string]: Visitor } = {};
-  save(visitor: Visitor): void {
-    this.visitors[visitor.id] = visitor;
-  }
-  findById(id: string): Visitor | null {
-    return this.visitors[id];
-  }
-}
-
-class InMemHouseholdRepository implements HouseholdRepository {
-  private households: { [key: string]: Household } = {};
-  private householdsByVisitor: { [key: string]: Household } = {};
-  save(household: Household): void {
-    household.inhabitants.forEach((visitor) => {
-      this.householdsByVisitor[visitor.id] = household;
-    });
-    this.households[household.id] = household;
-  }
-  findByAddress(address: Address): Household {
-    return this.households[address.id];
-  }
-  findByVisitor(visitor: Visitor): Household {
-    return this.householdsByVisitor[visitor.id];
-  }
-  findByVisitorId(id: string): Household {
-    return this.householdsByVisitor[id];
-  }
-}
+import { InMemVisitorsRepository } from "./src/domain/InMemVisitorsRepository.ts";
+import { InMemHouseholdRepository } from "./src/domain/InMemHouseholdRepository.ts";
 
 function testSetup(visitorId: string, address: Address) {
   const visitorRepository = new InMemVisitorsRepository();
