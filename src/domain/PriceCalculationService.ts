@@ -21,6 +21,10 @@ export default class PriceCalculationService {
       CONSTRUCTION: new PriceCalculationRule(0.1),
       "GREEN WASTE": new PriceCalculationRule(0.2)
     }
+    const excemptionRules: {[key: string]: ExcemptionRule} = {
+      CONSTRUCTION: new ExcemptionRule(),
+      "GREEN WASTE": new ExcemptionRule()
+    }
     const household = this.householdRepository.findByVisitorId(id)!;
     const deliveredFractionHistory = household.deliveredFractionHistory
     const deliveryPerType = deliveredFractionHistory.deliveriesOfCurrentYearPerType
@@ -31,6 +35,7 @@ export default class PriceCalculationService {
           household,
           type,
           deliveryPerType[type],
+          excemptionRules[type]!,
           priceRules[type]!
         );
       })
@@ -42,13 +47,16 @@ export default class PriceCalculationService {
     household: Household,
     type: string,
     deliveries: deliveredFraction[],
+    excemptionRule: ExcemptionRule,
     priceCalculationRule: PriceCalculationRule
   ) {
-    let weight = this.calculateExcemption(type, household.city, deliveries)
+    const weight = excemptionRule.calculate(type, household.city, deliveries)
     return priceCalculationRule.calculate(weight)
   }
+}
 
-  private calculateExcemption(type: string, city: string, deliveries: deliveredFraction[]) {
+class ExcemptionRule {
+  calculate(type: string, city: string, deliveries: deliveredFraction[]) {
     let totalWeight = deliveries.reduce<number>(
       (total, { weight }) => total + weight,
       0
@@ -68,7 +76,6 @@ export default class PriceCalculationService {
 
   }
 }
-
 
 class PriceCalculationRule {
   private readonly _price : number;
