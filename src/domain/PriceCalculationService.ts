@@ -45,13 +45,18 @@ export default class PriceCalculationService {
     deliveries: deliveredFraction[],
     price: number
   ) {
+    let weight = this.calculateExcemption(type, household.city, deliveries)
+    return this.calculatePrice(price, weight)
+  }
+
+  private calculateExcemption(type: string, city: string, deliveries: deliveredFraction[]) {
     let totalWeight = deliveries.reduce<number>(
       (total, { weight }) => total + weight,
       0
     );
     let lastWeight = deliveries[deliveries.length - 1]?.weight || 0;
     let previousWeight = totalWeight - lastWeight;
-    if (household.city === "Pineville" && type === "CONSTRUCTION") {
+    if (city === "Pineville" && type === "CONSTRUCTION") {
       if (lastWeight == totalWeight) {
         lastWeight = lastWeight - 100;
       } else if (previousWeight > 100) {
@@ -60,6 +65,12 @@ export default class PriceCalculationService {
         lastWeight = lastWeight - Math.max(100 - previousWeight, 0);
       }
     }
-    return Math.max(lastWeight * price, 0);
+    return lastWeight
+
+  }
+
+  private calculatePrice(price: number, weight: number) {
+
+    return Math.max(weight * price, 0);
   }
 }
