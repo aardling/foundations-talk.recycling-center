@@ -5,7 +5,8 @@ import Household from "./Household.ts";
 
 export default class PriceCalculationService {
   private readonly householdRepository: HouseholdRepository;
-  visitorRepository: VisitorsRepository;
+  private readonly visitorRepository: VisitorsRepository;
+
   constructor(
     visitorRepository: VisitorsRepository,
     householdRepository: HouseholdRepository
@@ -13,29 +14,8 @@ export default class PriceCalculationService {
     this.visitorRepository = visitorRepository;
     this.householdRepository = householdRepository;
   }
-  calculateFraction(
-    household: Household,
-    type: string,
-    deliveries: deliveredFraction[],
-    price: number
-  ) {
-    let totalWeight = deliveries.reduce<number>(
-      (total, { weight }) => total + weight,
-      0
-    );
-    let lastWeight = deliveries[deliveries.length - 1]?.weight || 0;
-    let previousWeight = totalWeight - lastWeight;
-    if (household.city === "Pineville" && type === "CONSTRUCTION") {
-      if (lastWeight == totalWeight) {
-        lastWeight = lastWeight - 100;
-      } else if (previousWeight > 100) {
-        // do nothing
-      } else {
-        lastWeight = lastWeight - Math.max(100 - previousWeight, 0);
-      }
-    }
-    return Math.max(lastWeight * price, 0);
-  }
+
+
   calculate(id: string) {
     const pricePerType: { [key: string]: number } = {
       CONSTRUCTION: 0.1,
@@ -66,5 +46,30 @@ export default class PriceCalculationService {
         );
       })
       .reduce((sum, price) => sum + price, 0);
+  }
+
+
+  calculateFraction(
+    household: Household,
+    type: string,
+    deliveries: deliveredFraction[],
+    price: number
+  ) {
+    let totalWeight = deliveries.reduce<number>(
+      (total, { weight }) => total + weight,
+      0
+    );
+    let lastWeight = deliveries[deliveries.length - 1]?.weight || 0;
+    let previousWeight = totalWeight - lastWeight;
+    if (household.city === "Pineville" && type === "CONSTRUCTION") {
+      if (lastWeight == totalWeight) {
+        lastWeight = lastWeight - 100;
+      } else if (previousWeight > 100) {
+        // do nothing
+      } else {
+        lastWeight = lastWeight - Math.max(100 - previousWeight, 0);
+      }
+    }
+    return Math.max(lastWeight * price, 0);
   }
 }
