@@ -375,3 +375,51 @@ Deno.test("calculate price example 9", () => {
   // THEN
   assertEquals(price, 5);
 });
+
+Deno.test("calculate price example 10", () => {
+  // PREP
+  const { householdRepository, visitService, priceCalculationService } =
+    testSetup(aiden.visitorId, aiden.address);
+  const johnVisitor = new Visitor(john.visitorId, john.address);
+  const household = householdRepository.findByAddress(john.address);
+  household.addInhabitant(johnVisitor);
+  householdRepository.save(household);
+
+  // GIVEN
+  visitService.registerDeliveryForHousehold(
+    aiden.address,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 50,
+      },
+    ],
+    new DeliveryDate("2022-04-07")
+  );
+  visitService.registerDeliveryForHousehold(
+    john.address,
+    [
+      {
+        type: "GREEN WASTE",
+        weight: 100,
+      },
+    ],
+    new DeliveryDate("2022-06-21")
+  );
+  visitService.registerDeliveryForHousehold(
+    john.address,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 100,
+      },
+    ],
+    new DeliveryDate("2022-06-22")
+  );
+
+  // WHEN
+  const price = priceCalculationService.calculate(john.visitorId);
+
+  // THEN
+  assertEquals(price, 5);
+});

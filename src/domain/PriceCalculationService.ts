@@ -22,19 +22,9 @@ export default class PriceCalculationService {
       "GREEN WASTE": 0.2,
     };
     const household = this.householdRepository.findByVisitorId(id)!;
-    const deliveries = household.deliveriesOfCurrentYear;
-    const deliveryPerType = deliveries.reduce(
-      (perType: { [key: string]: deliveredFraction[] }, delivery) => {
-        delivery.deliveredFractions.forEach((delivery) => {
-          if (!perType[delivery.type]) {
-            perType[delivery.type] = [];
-          }
-          perType[delivery.type].push(delivery);
-        });
-        return perType;
-      },
-      {}
-    );
+    const deliveredFractionHistory = household.deliveredFractionHistory
+    const deliveryPerType = deliveredFractionHistory.deliveriesOfCurrentYearPerType
+
     return Object.keys(deliveryPerType)
       .map((type) => {
         const price: number = pricePerType[type]!;

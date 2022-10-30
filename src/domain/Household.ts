@@ -1,4 +1,5 @@
 import Address from "./Address.ts";
+import DeliveredFractionHistory from "./DeliveredFractionHistory.ts";
 import { deliveredFraction, delivery } from "./Delivery.ts";
 import DeliveryDate from "./DeliveryDate.ts";
 import Visitor from "./Visitor.ts";
@@ -35,11 +36,10 @@ export default class Household {
     return this._inhabitants;
   }
 
-  get deliveriesOfCurrentYear() {
-    return this._deliveries.filter(({ deliveryDate }) =>
-      deliveryDate.inCalendarYear("2022")
-    );
+  get deliveredFractionHistory() {
+    return new DeliveredFractionHistory(this._deliveries)
   }
+
 
   get city() {
     return this._address.city;
