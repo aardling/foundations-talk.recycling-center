@@ -29,23 +29,11 @@ export default class PriceCalculationService {
     const currentDeliveryForCalculation = new CurrentDeliveryForCalculation(
       household.deliveries,
     );
-
-    return currentDeliveryForCalculation.allFractionTypes.reduce(
-      (price, type) => {
-        const weight = excemptionRules[type]!.calculate(
-          type,
-          household.city,
-          currentDeliveryForCalculation.deliveredFractionsFor(type),
-        );
-        return price +
-          priceRules[type]!.calculate(weight);
-      },
-      0,
-    );
+    return currentDeliveryForCalculation.calculate(household.city,excemptionRules, priceRules)
   }
 }
 
-interface ExcemptionCalculator {
+export interface ExcemptionCalculator {
   calculate(
     type: string,
     city: string,
@@ -90,7 +78,7 @@ class NoExcemptionRule implements ExcemptionCalculator {
   }
 }
 
-class PriceCalculationRule {
+export class PriceCalculationRule {
   private readonly _price: number;
   constructor(price: number) {
     this._price = price;

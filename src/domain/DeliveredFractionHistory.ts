@@ -1,4 +1,5 @@
 import { deliveredFraction, delivery } from "./Delivery.ts";
+import { ExcemptionCalculator, PriceCalculationRule } from "./PriceCalculationService.ts";
 
 export class CurrentDeliveryForCalculation {
   private readonly _allDeliveredFractions: delivery[] = [];
@@ -7,12 +8,27 @@ export class CurrentDeliveryForCalculation {
     this._allDeliveredFractions = allDeliveries;
   }
 
-  get allFractionTypes() {
+  calculate(city: string, excemptionRules: { [key: string]: ExcemptionCalculator }, priceRules: { [key: string]: PriceCalculationRule }) {
+    return this.allFractionTypes.reduce(
+      (price, type) => {
+        const weight = excemptionRules[type]!.calculate(
+          type,
+          city,
+          this.deliveredFractionsFor(type),
+        );
+        return price +
+          priceRules[type]!.calculate(weight);
+      },
+      0,
+    );
+  }
+
+  private get allFractionTypes() {
     return this.currentDelivery.deliveredFractions.map(
       ({ type }) => type,
     );
   }
-  deliveredFractionsFor(searchType: string): deliveredFraction[] {
+  private deliveredFractionsFor(searchType: string): deliveredFraction[] {
     return this.deliveriesOfCurrentYear.flatMap(({deliveredFractions}) => deliveredFractions).filter(({type}) => type === searchType)
   }
 
