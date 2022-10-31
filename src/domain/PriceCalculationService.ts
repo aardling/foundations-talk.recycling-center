@@ -19,6 +19,10 @@ export default class PriceCalculationService {
       CONSTRUCTION: new PriceCalculation(0.1),
       "GREEN WASTE": new PriceCalculation(0.2),
     };
+    const weightExcemptionRules: { [key: string]: WeightExcemption } = {
+      CONSTRUCTION: new WeightExcemption("Pineville", "CONSTRUCTION", 100),
+      "GREEN WASTE": new WeightExcemption("", "", 0),
+    };
     const household = this.householdRepository.findByVisitorId(id)!;
     const deliveries = household.deliveriesOfCurrentYear;
     const deliveryPerType = deliveries.reduce(
@@ -35,7 +39,7 @@ export default class PriceCalculationService {
     );
     return Object.keys(deliveryPerType)
       .map((type) => {
-        const weight = new WeightExcemption("Pineville", "CONSTRUCTION", 100)
+        const weight = weightExcemptionRules[type]!
           .calculate(
             household.city,
             type,
