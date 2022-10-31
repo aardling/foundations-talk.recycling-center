@@ -70,6 +70,10 @@ export default class PriceCalculationService {
         lastWeight = lastWeight - Math.max(100 - previousWeight, 0);
       }
     }
-    return Math.max(lastWeight * price, 0);
+    return this.calculatePrice(price, lastWeight)
+  }
+
+  private calculatePrice(price: number, weight: number) {
+    return Math.max(weight * price, 0);
   }
 }
