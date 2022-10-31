@@ -9,12 +9,11 @@ export default class PriceCalculationService {
 
   constructor(
     visitorRepository: VisitorsRepository,
-    householdRepository: HouseholdRepository
+    householdRepository: HouseholdRepository,
   ) {
     this.visitorRepository = visitorRepository;
     this.householdRepository = householdRepository;
   }
-
 
   calculate(id: string) {
     const pricePerType: { [key: string]: number } = {
@@ -33,7 +32,7 @@ export default class PriceCalculationService {
         });
         return perType;
       },
-      {}
+      {},
     );
     return Object.keys(deliveryPerType)
       .map((type) => {
@@ -42,26 +41,34 @@ export default class PriceCalculationService {
           household,
           type,
           deliveryPerType[type],
-          price
+          price,
         );
       })
       .reduce((sum, price) => sum + price, 0);
   }
 
-
   calculateFraction(
     household: Household,
     type: string,
     deliveries: deliveredFraction[],
-    price: number
+    price: number,
   ) {
-    let totalWeight = deliveries.reduce<number>(
+    const weight = this.calculateExcemption(household.city, type, deliveries);
+    return this.calculatePrice(price, weight);
+  }
+
+  private calculateExcemption(
+    city: string,
+    type: string,
+    deliveries: deliveredFraction[],
+  ) {
+    const totalWeight = deliveries.reduce<number>(
       (total, { weight }) => total + weight,
-      0
+      0,
     );
     let lastWeight = deliveries[deliveries.length - 1]?.weight || 0;
-    let previousWeight = totalWeight - lastWeight;
-    if (household.city === "Pineville" && type === "CONSTRUCTION") {
+    const previousWeight = totalWeight - lastWeight;
+    if (city === "Pineville" && type === "CONSTRUCTION") {
       if (lastWeight == totalWeight) {
         lastWeight = lastWeight - 100;
       } else if (previousWeight > 100) {
@@ -70,7 +77,7 @@ export default class PriceCalculationService {
         lastWeight = lastWeight - Math.max(100 - previousWeight, 0);
       }
     }
-    return this.calculatePrice(price, lastWeight)
+    return lastWeight;
   }
 
   private calculatePrice(price: number, weight: number) {
