@@ -1,6 +1,9 @@
 import VisitorsRepository from "./VisitorsRepository.ts";
-import { deliveredFraction } from "./Delivery.ts";
+import { deliveredFraction, delivery } from "./Delivery.ts";
 import HouseholdRepository from "./HouseholdRepository.ts";
+
+type PriceCalculationRules = { [key: string]: PriceCalculation };
+type WeightExcemptionRules = { [key: string]: WeightExcemption };
 
 export default class PriceCalculationService {
   private readonly householdRepository: HouseholdRepository;
@@ -15,13 +18,11 @@ export default class PriceCalculationService {
   }
 
   calculate(id: string) {
-    const priceCalculationRules: { [key: string]: PriceCalculation } = {
+    const priceCalculationRules: PriceCalculationRules = {
       CONSTRUCTION: new PriceCalculation(0.1),
       "GREEN WASTE": new PriceCalculation(0.2),
     };
-    const weightExcemptionRules: {
-      [key: string]: WeightExcemption;
-    } = {
+    const weightExcemptionRules: WeightExcemptionRules = {
       CONSTRUCTION: new WeightExcemptionPerFractionAndCity(
         "Pineville",
         "CONSTRUCTION",
@@ -31,7 +32,26 @@ export default class PriceCalculationService {
     };
     const household = this.householdRepository.findByVisitorId(id)!;
     const deliveries = household.deliveriesOfCurrentYear;
-    const deliveryPerType = deliveries.reduce(
+    const deliveryCalculator = new DeliveryCalculator(deliveries);
+    return deliveryCalculator.calculate(
+      priceCalculationRules,
+      weightExcemptionRules,
+      household.city,
+    );
+  }
+}
+
+class DeliveryCalculator {
+  private readonly _deliveries: delivery[];
+  constructor(deliveries: delivery[]) {
+    this._deliveries = deliveries;
+  }
+  calculate(
+    priceCalculationRules: PriceCalculationRules,
+    weightExcemptionRules: WeightExcemptionRules,
+    city: string,
+  ) {
+    const deliveryPerType = this._deliveries.reduce(
       (perType: { [key: string]: deliveredFraction[] }, delivery) => {
         delivery.deliveredFractions.forEach((delivery) => {
           if (!perType[delivery.type]) {
@@ -47,7 +67,7 @@ export default class PriceCalculationService {
       .map((type) => {
         const weight = weightExcemptionRules[type]!
           .calculate(
-            household.city,
+            city,
             type,
             deliveryPerType[type],
           );
