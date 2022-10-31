@@ -51,7 +51,7 @@ class DeliveryCalculator {
     weightExcemptionRules: WeightExcemptionRules,
     city: string,
   ) {
-    return this.allFractionTypes.reduce((price, type) => {
+    return this.fractionTypesForCurrentDelivery.reduce((price, type) => {
       const weight = weightExcemptionRules[type]!
         .calculate(
           city,
@@ -62,7 +62,7 @@ class DeliveryCalculator {
     }, 0);
   }
 
-  private get allFractionTypes() {
+  private get fractionTypesForCurrentDelivery() {
     return this.currentDelivery.deliveredFractions.map(({ type }) => type);
   }
 
@@ -74,9 +74,29 @@ class DeliveryCalculator {
     const x = this._deliveries.flatMap(({ deliveredFractions }) =>
       deliveredFractions
     );
-    return x.filter(
+    const deliveredFractions = x.filter(
       ({ type }) => type === searchType,
     );
+    return new DeliveredFractions(deliveredFractions);
+  }
+}
+
+class DeliveredFractions {
+  private readonly _deliveries: deliveredFraction[];
+  constructor(deliveries: deliveredFraction[]) {
+    this._deliveries = deliveries;
+  }
+  get lastWeight() {
+    return this._deliveries[this._deliveries.length - 1]?.weight || 0;
+  }
+  get totalWeight() {
+    return this._deliveries.reduce<number>(
+      (total, { weight }) => total + weight,
+      0,
+    );
+  }
+  get previousWeight() {
+    return this.totalWeight - this.lastWeight;
   }
 }
 
@@ -94,7 +114,7 @@ interface WeightExcemption {
   calculate(
     city: string,
     type: string,
-    deliveries: deliveredFraction[],
+    deliveries: DeliveredFractions,
   ): number;
 }
 
@@ -102,10 +122,9 @@ class NoWeightExcemption implements WeightExcemption {
   calculate(
     _city: string,
     _type: string,
-    deliveries: deliveredFraction[],
+    deliveries: DeliveredFractions,
   ) {
-    const lastWeight = deliveries[deliveries.length - 1]?.weight || 0;
-    return lastWeight;
+    return deliveries.lastWeight;
   }
 }
 
@@ -123,14 +142,11 @@ class WeightExcemptionPerFractionAndCity implements WeightExcemption {
   calculate(
     city: string,
     type: string,
-    deliveries: deliveredFraction[],
+    deliveries: DeliveredFractions,
   ) {
-    const totalWeight = deliveries.reduce<number>(
-      (total, { weight }) => total + weight,
-      0,
-    );
-    let lastWeight = deliveries[deliveries.length - 1]?.weight || 0;
-    const previousWeight = totalWeight - lastWeight;
+    let lastWeight = deliveries.lastWeight;
+    const totalWeight = deliveries.totalWeight;
+    const previousWeight = deliveries.previousWeight;
     if (city === this._city && type === this._type) {
       if (lastWeight == totalWeight) {
         lastWeight = lastWeight - this._excemption;
