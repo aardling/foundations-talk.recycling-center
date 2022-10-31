@@ -15,9 +15,9 @@ export default class PriceCalculationService {
   }
 
   calculate(id: string) {
-    const pricePerType: { [key: string]: number } = {
-      CONSTRUCTION: 0.1,
-      "GREEN WASTE": 0.2,
+    const priceCalculationRules: { [key: string]: PriceCalculation } = {
+      CONSTRUCTION: new PriceCalculation(0.1),
+      "GREEN WASTE": new PriceCalculation(0.2),
     };
     const household = this.householdRepository.findByVisitorId(id)!;
     const deliveries = household.deliveriesOfCurrentYear;
@@ -35,21 +35,24 @@ export default class PriceCalculationService {
     );
     return Object.keys(deliveryPerType)
       .map((type) => {
-        const price: number = pricePerType[type]!;
         const weight = new WeightExcemption().calculate(
           household.city,
           type,
           deliveryPerType[type],
         );
-        return new PriceCalculation().calculate(price, weight);
+        return priceCalculationRules[type]!.calculate(weight);
       })
       .reduce((sum, price) => sum + price, 0);
   }
 }
 
 class PriceCalculation {
-  calculate(price: number, weight: number) {
-    return Math.max(weight * price, 0);
+  private _price: number;
+  constructor(price: number) {
+    this._price = price;
+  }
+  calculate(weight: number) {
+    return Math.max(weight * this._price, 0);
   }
 }
 
