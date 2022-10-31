@@ -15,7 +15,7 @@ function testSetup(visitorId: string, address: Address) {
   const visitService = new VisitService(visitorRepository, householdRepository);
   const priceCalculationService = new PriceCalculationService(
     visitorRepository,
-    householdRepository
+    householdRepository,
   );
   const visitor = new Visitor(visitorId, address);
   visitorRepository.save(visitor);
@@ -52,7 +52,7 @@ Deno.test("calculate price example 1", () => {
   const visitorId = kasey.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    kasey.address
+    kasey.address,
   );
 
   // GIVEN
@@ -70,7 +70,7 @@ Deno.test("calculate price example 2", () => {
   const visitorId = kasey.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    kasey.address
+    kasey.address,
   );
 
   // GIVEN
@@ -82,7 +82,7 @@ Deno.test("calculate price example 2", () => {
         weight: 200,
       },
     ],
-    deliveryDate
+    deliveryDate,
   );
 
   // WHEN
@@ -97,7 +97,7 @@ Deno.test("calculate price example 3", () => {
   const visitorId = aiden.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    aiden.address
+    aiden.address,
   );
 
   // GIVEN
@@ -109,7 +109,7 @@ Deno.test("calculate price example 3", () => {
         weight: 200,
       },
     ],
-    deliveryDate
+    deliveryDate,
   );
 
   // WHEN
@@ -124,7 +124,7 @@ Deno.test("calculate price example 4", () => {
   const visitorId = aiden.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    aiden.address
+    aiden.address,
   );
 
   // GIVEN
@@ -136,7 +136,7 @@ Deno.test("calculate price example 4", () => {
         weight: 50,
       },
     ],
-    deliveryDate
+    deliveryDate,
   );
   visitService.registerDelivery(
     visitorId,
@@ -146,7 +146,7 @@ Deno.test("calculate price example 4", () => {
         weight: 25,
       },
     ],
-    deliveryDate
+    deliveryDate,
   );
   visitService.registerDelivery(
     visitorId,
@@ -156,7 +156,7 @@ Deno.test("calculate price example 4", () => {
         weight: 100,
       },
     ],
-    deliveryDate
+    deliveryDate,
   );
 
   // WHEN
@@ -171,7 +171,7 @@ Deno.test("calculate price example 5", () => {
   const visitorId = aiden.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    aiden.address
+    aiden.address,
   );
 
   // GIVEN
@@ -183,7 +183,7 @@ Deno.test("calculate price example 5", () => {
         weight: 50,
       },
     ],
-    deliveryDate
+    deliveryDate,
   );
   visitService.registerDelivery(
     visitorId,
@@ -193,7 +193,7 @@ Deno.test("calculate price example 5", () => {
         weight: 25,
       },
     ],
-    deliveryDate
+    deliveryDate,
   );
   visitService.registerDelivery(
     visitorId,
@@ -203,7 +203,7 @@ Deno.test("calculate price example 5", () => {
         weight: 100,
       },
     ],
-    deliveryDate
+    deliveryDate,
   );
   visitService.registerDelivery(
     visitorId,
@@ -213,7 +213,7 @@ Deno.test("calculate price example 5", () => {
         weight: 100,
       },
     ],
-    deliveryDate
+    deliveryDate,
   );
 
   // WHEN
@@ -228,7 +228,7 @@ Deno.test("calculate price example 6", () => {
   const visitorId = aiden.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    aiden.address
+    aiden.address,
   );
 
   // GIVEN
@@ -240,7 +240,7 @@ Deno.test("calculate price example 6", () => {
         weight: 25,
       },
     ],
-    deliveryDate
+    deliveryDate,
   );
 
   // WHEN
@@ -255,7 +255,7 @@ Deno.test("calculate price example 7", () => {
   const visitorId = aiden.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    aiden.address
+    aiden.address,
   );
 
   // GIVEN
@@ -267,7 +267,7 @@ Deno.test("calculate price example 7", () => {
         weight: 25,
       },
     ],
-    deliveryDate
+    deliveryDate,
   );
   visitService.registerDelivery(
     visitorId,
@@ -277,7 +277,7 @@ Deno.test("calculate price example 7", () => {
         weight: 100,
       },
     ],
-    deliveryDate
+    deliveryDate,
   );
 
   // WHEN
@@ -296,7 +296,7 @@ Deno.test("calculate price example 8", () => {
   const visitorId = aiden.visitorId;
   const { visitService, priceCalculationService } = testSetup(
     visitorId,
-    aiden.address
+    aiden.address,
   );
 
   // GIVEN
@@ -308,7 +308,7 @@ Deno.test("calculate price example 8", () => {
         weight: 150,
       },
     ],
-    new DeliveryDate("2021-10-02")
+    new DeliveryDate("2021-10-02"),
   );
   visitService.registerDelivery(
     visitorId,
@@ -318,7 +318,7 @@ Deno.test("calculate price example 8", () => {
         weight: 50,
       },
     ],
-    new DeliveryDate("2022-04-07")
+    new DeliveryDate("2022-04-07"),
   );
   visitService.registerDelivery(
     visitorId,
@@ -328,7 +328,7 @@ Deno.test("calculate price example 8", () => {
         weight: 100,
       },
     ],
-    new DeliveryDate("2022-06-22")
+    new DeliveryDate("2022-06-22"),
   );
 
   // WHEN
@@ -356,7 +356,7 @@ Deno.test("calculate price example 9", () => {
         weight: 50,
       },
     ],
-    new DeliveryDate("2022-04-07")
+    new DeliveryDate("2022-04-07"),
   );
   visitService.registerDeliveryForHousehold(
     john.address,
@@ -366,7 +366,55 @@ Deno.test("calculate price example 9", () => {
         weight: 100,
       },
     ],
-    new DeliveryDate("2022-06-22")
+    new DeliveryDate("2022-06-22"),
+  );
+
+  // WHEN
+  const price = priceCalculationService.calculate(john.visitorId);
+
+  // THEN
+  assertEquals(price, 5);
+});
+
+Deno.test("calculate price example 10", () => {
+  // PREP
+  const { householdRepository, visitService, priceCalculationService } =
+    testSetup(aiden.visitorId, aiden.address);
+  const johnVisitor = new Visitor(john.visitorId, john.address);
+  const household = householdRepository.findByAddress(john.address);
+  household.addInhabitant(johnVisitor);
+  householdRepository.save(household);
+
+  // GIVEN
+  visitService.registerDeliveryForHousehold(
+    aiden.address,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 50,
+      },
+    ],
+    new DeliveryDate("2022-04-07"),
+  );
+  visitService.registerDeliveryForHousehold(
+    john.address,
+    [
+      {
+        type: "GREEN WASTE",
+        weight: 100,
+      },
+    ],
+    new DeliveryDate("2022-06-21"),
+  );
+  visitService.registerDeliveryForHousehold(
+    john.address,
+    [
+      {
+        type: "CONSTRUCTION",
+        weight: 100,
+      },
+    ],
+    new DeliveryDate("2022-06-22"),
   );
 
   // WHEN
