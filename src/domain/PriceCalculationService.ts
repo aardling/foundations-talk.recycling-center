@@ -7,22 +7,18 @@ type WeightExcemptionRules = { [key: string]: WeightExcemption };
 
 export default class PriceCalculationService {
   private readonly householdRepository: HouseholdRepository;
-  private readonly visitorRepository: VisitorsRepository;
+  private readonly priceCalculationRules: PriceCalculationRules;
+  private readonly weightExcemptionRules: WeightExcemptionRules;
 
   constructor(
-    visitorRepository: VisitorsRepository,
     householdRepository: HouseholdRepository,
   ) {
-    this.visitorRepository = visitorRepository;
     this.householdRepository = householdRepository;
-  }
-
-  calculate(id: string) {
-    const priceCalculationRules: PriceCalculationRules = {
+    this.priceCalculationRules = {
       CONSTRUCTION: new PriceCalculation(0.1),
       "GREEN WASTE": new PriceCalculation(0.2),
     };
-    const weightExcemptionRules: WeightExcemptionRules = {
+    this.weightExcemptionRules = {
       CONSTRUCTION: new WeightExcemptionPerFractionAndCity(
         "Pineville",
         "CONSTRUCTION",
@@ -30,12 +26,15 @@ export default class PriceCalculationService {
       ),
       "GREEN WASTE": new NoWeightExcemption(),
     };
+  }
+
+  calculate(id: string) {
     const household = this.householdRepository.findByVisitorId(id)!;
     const deliveries = household.deliveriesOfCurrentYear;
     const deliveryCalculator = new DeliveryCalculator(deliveries);
     return deliveryCalculator.calculate(
-      priceCalculationRules,
-      weightExcemptionRules,
+      this.priceCalculationRules,
+      this.weightExcemptionRules,
       household.city,
     );
   }
