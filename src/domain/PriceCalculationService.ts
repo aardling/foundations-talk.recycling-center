@@ -51,29 +51,32 @@ class DeliveryCalculator {
     weightExcemptionRules: WeightExcemptionRules,
     city: string,
   ) {
-    const deliveryPerType = this._deliveries.reduce(
-      (perType: { [key: string]: deliveredFraction[] }, delivery) => {
-        delivery.deliveredFractions.forEach((delivery) => {
-          if (!perType[delivery.type]) {
-            perType[delivery.type] = [];
-          }
-          perType[delivery.type].push(delivery);
-        });
-        return perType;
-      },
-      {},
+    return this.allFractionTypes.reduce((price, type) => {
+      const weight = weightExcemptionRules[type]!
+        .calculate(
+          city,
+          type,
+          this.deliveredFractionsFor(type),
+        );
+      return price + priceCalculationRules[type]!.calculate(weight);
+    }, 0);
+  }
+
+  private get allFractionTypes() {
+    return this.currentDelivery.deliveredFractions.map(({ type }) => type);
+  }
+
+  private get currentDelivery() {
+    return this._deliveries[this._deliveries.length - 1];
+  }
+
+  private deliveredFractionsFor(searchType: string) {
+    const x = this._deliveries.flatMap(({ deliveredFractions }) =>
+      deliveredFractions
     );
-    return Object.keys(deliveryPerType)
-      .map((type) => {
-        const weight = weightExcemptionRules[type]!
-          .calculate(
-            city,
-            type,
-            deliveryPerType[type],
-          );
-        return priceCalculationRules[type]!.calculate(weight);
-      })
-      .reduce((sum, price) => sum + price, 0);
+    return x.filter(
+      ({ type }) => type === searchType,
+    );
   }
 }
 
