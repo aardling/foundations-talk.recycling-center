@@ -35,11 +35,12 @@ export default class PriceCalculationService {
     );
     return Object.keys(deliveryPerType)
       .map((type) => {
-        const weight = new WeightExcemption().calculate(
-          household.city,
-          type,
-          deliveryPerType[type],
-        );
+        const weight = new WeightExcemption("Pineville", "CONSTRUCTION", 100)
+          .calculate(
+            household.city,
+            type,
+            deliveryPerType[type],
+          );
         return priceCalculationRules[type]!.calculate(weight);
       })
       .reduce((sum, price) => sum + price, 0);
@@ -57,6 +58,16 @@ class PriceCalculation {
 }
 
 class WeightExcemption {
+  private readonly _city: string;
+  private readonly _type: string;
+  private readonly _excemption: number;
+
+  constructor(city: string, type: string, excemption: number) {
+    this._city = city;
+    this._type = type;
+    this._excemption = excemption;
+  }
+
   calculate(
     city: string,
     type: string,
@@ -68,13 +79,14 @@ class WeightExcemption {
     );
     let lastWeight = deliveries[deliveries.length - 1]?.weight || 0;
     const previousWeight = totalWeight - lastWeight;
-    if (city === "Pineville" && type === "CONSTRUCTION") {
+    if (city === this._city && type === this._type) {
       if (lastWeight == totalWeight) {
-        lastWeight = lastWeight - 100;
-      } else if (previousWeight > 100) {
+        lastWeight = lastWeight - this._excemption;
+      } else if (previousWeight > this._excemption) {
         // do nothing
       } else {
-        lastWeight = lastWeight - Math.max(100 - previousWeight, 0);
+        lastWeight = lastWeight -
+          Math.max(this._excemption - previousWeight, 0);
       }
     }
     return lastWeight;
