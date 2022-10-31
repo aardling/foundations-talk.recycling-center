@@ -19,9 +19,15 @@ export default class PriceCalculationService {
       CONSTRUCTION: new PriceCalculation(0.1),
       "GREEN WASTE": new PriceCalculation(0.2),
     };
-    const weightExcemptionRules: { [key: string]: WeightExcemption } = {
-      CONSTRUCTION: new WeightExcemption("Pineville", "CONSTRUCTION", 100),
-      "GREEN WASTE": new WeightExcemption("", "", 0),
+    const weightExcemptionRules: {
+      [key: string]: WeightExcemption;
+    } = {
+      CONSTRUCTION: new WeightExcemptionPerFractionAndCity(
+        "Pineville",
+        "CONSTRUCTION",
+        100,
+      ),
+      "GREEN WASTE": new NoWeightExcemption(),
     };
     const household = this.householdRepository.findByVisitorId(id)!;
     const deliveries = household.deliveriesOfCurrentYear;
@@ -61,7 +67,26 @@ class PriceCalculation {
   }
 }
 
-class WeightExcemption {
+interface WeightExcemption {
+  calculate(
+    city: string,
+    type: string,
+    deliveries: deliveredFraction[],
+  ): number;
+}
+
+class NoWeightExcemption implements WeightExcemption {
+  calculate(
+    _city: string,
+    _type: string,
+    deliveries: deliveredFraction[],
+  ) {
+    const lastWeight = deliveries[deliveries.length - 1]?.weight || 0;
+    return lastWeight;
+  }
+}
+
+class WeightExcemptionPerFractionAndCity implements WeightExcemption {
   private readonly _city: string;
   private readonly _type: string;
   private readonly _excemption: number;
