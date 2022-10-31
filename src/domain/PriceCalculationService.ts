@@ -1,7 +1,6 @@
 import VisitorsRepository from "./VisitorsRepository.ts";
 import { deliveredFraction } from "./Delivery.ts";
 import HouseholdRepository from "./HouseholdRepository.ts";
-import Household from "./Household.ts";
 
 export default class PriceCalculationService {
   private readonly householdRepository: HouseholdRepository;
@@ -37,24 +36,14 @@ export default class PriceCalculationService {
     return Object.keys(deliveryPerType)
       .map((type) => {
         const price: number = pricePerType[type]!;
-        return this.calculateFraction(
-          household,
+        const weight = this.calculateExcemption(
+          household.city,
           type,
           deliveryPerType[type],
-          price,
         );
+        return this.calculatePrice(price, weight);
       })
       .reduce((sum, price) => sum + price, 0);
-  }
-
-  calculateFraction(
-    household: Household,
-    type: string,
-    deliveries: deliveredFraction[],
-    price: number,
-  ) {
-    const weight = this.calculateExcemption(household.city, type, deliveries);
-    return this.calculatePrice(price, weight);
   }
 
   private calculateExcemption(
@@ -81,6 +70,12 @@ export default class PriceCalculationService {
   }
 
   private calculatePrice(price: number, weight: number) {
+    return Math.max(weight * price, 0);
+  }
+}
+
+class PriceCalculation {
+  calculate(price: number, weight: number) {
     return Math.max(weight * price, 0);
   }
 }
