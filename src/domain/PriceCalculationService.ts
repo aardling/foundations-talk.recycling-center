@@ -36,17 +36,25 @@ export default class PriceCalculationService {
     return Object.keys(deliveryPerType)
       .map((type) => {
         const price: number = pricePerType[type]!;
-        const weight = this.calculateExcemption(
+        const weight = new WeightExcemption().calculate(
           household.city,
           type,
           deliveryPerType[type],
         );
-        return this.calculatePrice(price, weight);
+        return new PriceCalculation().calculate(price, weight);
       })
       .reduce((sum, price) => sum + price, 0);
   }
+}
 
-  private calculateExcemption(
+class PriceCalculation {
+  calculate(price: number, weight: number) {
+    return Math.max(weight * price, 0);
+  }
+}
+
+class WeightExcemption {
+  calculate(
     city: string,
     type: string,
     deliveries: deliveredFraction[],
@@ -67,15 +75,5 @@ export default class PriceCalculationService {
       }
     }
     return lastWeight;
-  }
-
-  private calculatePrice(price: number, weight: number) {
-    return Math.max(weight * price, 0);
-  }
-}
-
-class PriceCalculation {
-  calculate(price: number, weight: number) {
-    return Math.max(weight * price, 0);
   }
 }
