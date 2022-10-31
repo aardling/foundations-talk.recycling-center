@@ -14,7 +14,6 @@ function testSetup(visitorId: string, address: Address) {
   const householdRepository = new InMemHouseholdRepository();
   const visitService = new VisitService(visitorRepository, householdRepository);
   const priceCalculationService = new PriceCalculationService(
-    visitorRepository,
     householdRepository,
   );
   const visitor = new Visitor(visitorId, address);
